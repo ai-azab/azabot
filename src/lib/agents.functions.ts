@@ -1,3 +1,5 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
@@ -21,7 +23,7 @@ export interface BotAgent {
 const COLUMNS =
   "id,name,description,provider,agent_name,agent_version,deployment,system_prompt,temperature,max_tokens,is_default,is_active,sort_order,updated_at";
 
-async function assertAdmin(context: { supabase: any; userId: string }) {
+async function assertAdmin(context: { supabase: SupabaseClient<Database>; userId: string }) {
   const { data: isAdmin } = await context.supabase.rpc("has_role", {
     _user_id: context.userId,
     _role: "admin",
@@ -97,7 +99,12 @@ export const saveAgent = createServerFn({ method: "POST" })
     }
 
     const res = id
-      ? await context.supabase.from("bot_agents").update(fields).eq("id", id).select(COLUMNS).single()
+      ? await context.supabase
+          .from("bot_agents")
+          .update(fields)
+          .eq("id", id)
+          .select(COLUMNS)
+          .single()
       : await context.supabase.from("bot_agents").insert(fields).select(COLUMNS).single();
 
     if (res.error) throw new Error("تعذر حفظ الوكيل");

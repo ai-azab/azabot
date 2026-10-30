@@ -38,10 +38,7 @@ const iconBySlug = {
   prod: Package,
 } as const;
 
-export function AgentPickerPopover({
-  selectedAgentId,
-  onSelectAgent,
-}: AgentPickerPopoverProps) {
+export function AgentPickerPopover({ selectedAgentId, onSelectAgent }: AgentPickerPopoverProps) {
   const [open, setOpen] = useState(false);
   const [agents, setAgents] = useState<AgentItem[]>([]);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -82,7 +79,7 @@ export function AgentPickerPopover({
   );
 
   const SelectedIcon = selected
-    ? iconBySlug[selected.slug as keyof typeof iconBySlug] ?? Bot
+    ? (iconBySlug[selected.slug as keyof typeof iconBySlug] ?? Bot)
     : Bot;
 
   return (

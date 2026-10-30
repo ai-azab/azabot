@@ -66,9 +66,7 @@ export function ChatbotWidget({
       window.localStorage.setItem(LS_CONV_ID, id);
     }
     setConversationId(id);
-    setSelectedAgentId(
-      window.localStorage.getItem(LS_AGENT_ID) || "az-agent-azabot",
-    );
+    setSelectedAgentId(window.localStorage.getItem(LS_AGENT_ID) || "az-agent-azabot");
     setHydrated(true);
   }, []);
 

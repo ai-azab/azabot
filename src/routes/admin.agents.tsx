@@ -2,22 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import {
-  Bot,
-  Plus,
-  Save,
-  Trash2,
-  Loader2,
-  Star,
-  AlertTriangle,
-  CheckCircle2,
-} from "lucide-react";
-import {
-  listAgents,
-  saveAgent,
-  deleteAgent,
-  type BotAgent,
-} from "@/lib/agents.functions";
+import { Bot, Plus, Save, Trash2, Loader2, Star, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { listAgents, saveAgent, deleteAgent, type BotAgent } from "@/lib/agents.functions";
 
 export const Route = createFileRoute("/admin/agents")({
   component: AgentsPage,
@@ -56,8 +42,7 @@ function AgentsPage() {
   });
 
   const saveMut = useMutation({
-    mutationFn: (d: Draft) =>
-      persist({ data: { ...d, id: d.id || null } }),
+    mutationFn: (d: Draft) => persist({ data: { ...d, id: d.id || null } }),
     onSuccess: () => {
       setDraft(null);
       setNotice("تم حفظ إعدادات الوكيل بنجاح.");
@@ -113,9 +98,7 @@ function AgentsPage() {
           }}
           className="space-y-4 rounded-2xl border border-black/5 bg-white p-5 shadow-sm"
         >
-          <h2 className="text-sm font-bold">
-            {draft.id ? "تعديل الوكيل" : "إضافة وكيل"}
-          </h2>
+          <h2 className="text-sm font-bold">{draft.id ? "تعديل الوكيل" : "إضافة وكيل"}</h2>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="الاسم المعروض">
@@ -165,9 +148,7 @@ function AgentsPage() {
                 type="number"
                 min={0}
                 value={draft.sort_order}
-                onChange={(e) =>
-                  setDraft({ ...draft, sort_order: Number(e.target.value) })
-                }
+                onChange={(e) => setDraft({ ...draft, sort_order: Number(e.target.value) })}
                 className={inputCls}
               />
             </Field>
@@ -178,9 +159,7 @@ function AgentsPage() {
                 max={2}
                 step={0.1}
                 value={draft.temperature}
-                onChange={(e) =>
-                  setDraft({ ...draft, temperature: Number(e.target.value) })
-                }
+                onChange={(e) => setDraft({ ...draft, temperature: Number(e.target.value) })}
                 className="w-full accent-[#ffb900]"
               />
             </Field>
@@ -190,9 +169,7 @@ function AgentsPage() {
                 min={64}
                 max={16000}
                 value={draft.max_tokens}
-                onChange={(e) =>
-                  setDraft({ ...draft, max_tokens: Number(e.target.value) })
-                }
+                onChange={(e) => setDraft({ ...draft, max_tokens: Number(e.target.value) })}
                 className={inputCls}
               />
             </Field>

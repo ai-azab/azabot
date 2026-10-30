@@ -64,15 +64,21 @@ function toolReply(name: string, r: Record<string, unknown>): string | null {
       num && `رقم الطلب: **${num}**`,
       url && `رابط المتابعة: ${url}`,
       "سيتواصل معك الفريق المختص قريباً.",
-    ].filter(Boolean).join("\n");
+    ]
+      .filter(Boolean)
+      .join("\n");
   }
-  if (name === "get_request_status") {
-    return [
-      num && `الطلب: **${num}**`,
-      status && `الحالة: ${status}`,
-      stage && `المرحلة: ${stage}`,
-      url && `رابط المتابعة: ${url}`,
-    ].filter(Boolean).join("\n") || null;
+  if (name === "get_maintenance_status") {
+    return (
+      [
+        num && `الطلب: **${num}**`,
+        status && `الحالة: ${status}`,
+        stage && `المرحلة: ${stage}`,
+        url && `رابط المتابعة: ${url}`,
+      ]
+        .filter(Boolean)
+        .join("\n") || null
+    );
   }
   return null;
 }
@@ -86,7 +92,9 @@ export async function runAgent(
   if (!model) return { reply: "محرك الذكاء الاصطناعي غير مهيأ حالياً." };
 
   let tools: Array<Record<string, unknown>> = [];
-  let runTool: ((n: string, a: Record<string, unknown>) => Promise<Record<string, unknown>>) | null = null;
+  let runTool:
+    | ((n: string, a: Record<string, unknown>) => Promise<Record<string, unknown>>)
+    | null = null;
   if (agent.tools.length) {
     const m = await import("@/lib/maintenance.server");
     if (m.maintenanceToolsAvailable()) {
@@ -111,10 +119,18 @@ export async function runAgent(
       const outputs: Array<Record<string, unknown>> = [];
       for (const call of calls) {
         let args: Record<string, unknown> = {};
-        try { args = call.arguments ? JSON.parse(call.arguments) : {}; } catch { /* ignore */ }
+        try {
+          args = call.arguments ? JSON.parse(call.arguments) : {};
+        } catch {
+          /* ignore */
+        }
         const out = await runTool(call.name as string, args);
         last = { name: call.name as string, result: out };
-        outputs.push({ type: "function_call_output", call_id: call.call_id || call.id, output: JSON.stringify(out) });
+        outputs.push({
+          type: "function_call_output",
+          call_id: call.call_id || call.id,
+          output: JSON.stringify(out),
+        });
       }
       result = await foundry({ ...base, previous_response_id: result.id, input: outputs });
     }

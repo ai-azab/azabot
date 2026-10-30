@@ -8,11 +8,7 @@ import type {
 } from "@/types/chat";
 import { sendChatMessage } from "@/lib/chatApi";
 import { downloadChat } from "@/lib/chatExport";
-import {
-  CHAT_ERROR_MESSAGES,
-  classifyChatError,
-  logChatError,
-} from "@/lib/chatErrors";
+import { CHAT_ERROR_MESSAGES, classifyChatError, logChatError } from "@/lib/chatErrors";
 import {
   detectLanguage,
   getSpeechRecognition,
@@ -70,10 +66,7 @@ export function ChatWindow({
   const busy = phase === "connecting" || phase === "streaming";
   const isListening = phase === "listening";
 
-  const runRequest = async (
-    userMsgId: string,
-    payload: PendingPayload,
-  ) => {
+  const runRequest = async (userMsgId: string, payload: PendingPayload) => {
     setPhase("connecting");
 
     try {

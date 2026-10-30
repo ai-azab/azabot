@@ -7,11 +7,7 @@ interface VoiceControlsProps {
   onToggle: () => void;
 }
 
-export function VoiceControls({
-  isListening,
-  supported,
-  onToggle,
-}: VoiceControlsProps) {
+export function VoiceControls({ isListening, supported, onToggle }: VoiceControlsProps) {
   return (
     <button
       type="button"
@@ -33,13 +29,8 @@ export function VoiceControls({
           : "text-[#030957]/70 hover:bg-[#030957]/5 hover:text-[#030957]",
       )}
       style={isListening ? { backgroundColor: "#ef4444" } : undefined}
-
     >
-      {isListening ? (
-        <MicOff className="h-4 w-4" />
-      ) : (
-        <Mic className="h-4 w-4" />
-      )}
+      {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
     </button>
   );
 }

@@ -1,7 +1,9 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-async function assertAdmin(context: { supabase: any; userId: string }) {
+async function assertAdmin(context: { supabase: SupabaseClient<Database>; userId: string }) {
   const { data, error } = await context.supabase.rpc("has_role", {
     _user_id: context.userId,
     _role: "admin",
@@ -51,15 +53,7 @@ export const callAzureOpenAI = createServerFn({ method: "POST" })
   .inputValidator((data: AzureRequestData) => data)
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const {
-      endpoint,
-      apiKey,
-      deployment,
-      apiVersion,
-      temperature,
-      maxTokens,
-      messages,
-    } = data;
+    const { endpoint, apiKey, deployment, apiVersion, temperature, maxTokens, messages } = data;
 
     if (!endpoint || !apiKey || !deployment) {
       throw new Error("الإعدادات غير مكتملة: endpoint و apiKey و deployment مطلوبة.");

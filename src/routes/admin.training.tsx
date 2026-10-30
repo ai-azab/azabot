@@ -131,7 +131,10 @@ function TrainingPage() {
 
   const handleSaveExample = (assistantMsg: TMsg) => {
     const lastUserBefore = [...msgs]
-      .slice(0, msgs.findIndex((m) => m.id === assistantMsg.id))
+      .slice(
+        0,
+        msgs.findIndex((m) => m.id === assistantMsg.id),
+      )
       .reverse()
       .find((m) => m.role === "user");
     if (!lastUserBefore) return;
@@ -248,10 +251,7 @@ function TrainingPage() {
           <div ref={endRef} />
         </div>
 
-        <form
-          onSubmit={handleSend}
-          className="flex items-end gap-2 border-t border-black/5 p-3"
-        >
+        <form onSubmit={handleSend} className="flex items-end gap-2 border-t border-black/5 p-3">
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -294,10 +294,7 @@ function TrainingPage() {
             </div>
           )}
           {examples.map((ex) => (
-            <div
-              key={ex.id}
-              className="rounded-lg border border-black/5 bg-[#f4f5fb] p-3 text-xs"
-            >
+            <div key={ex.id} className="rounded-lg border border-black/5 bg-[#f4f5fb] p-3 text-xs">
               <div className="font-semibold text-[#030957]">س: {ex.question}</div>
               {editing?.id === ex.id ? (
                 <div className="mt-2 space-y-2">

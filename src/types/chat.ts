@@ -48,7 +48,6 @@ export interface ChatSettingsState {
   voiceURI?: string;
 }
 
-
 export interface ChatApiRequestMeta {
   language: "ar" | "en";
   source: "web-widget";

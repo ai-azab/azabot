@@ -9,9 +9,7 @@ export function exportToTxt(messages: ChatMessage[]): string {
     .map((m) => {
       const who = m.role === "user" ? "User" : "Assistant";
       const files =
-        m.files && m.files.length
-          ? `\n  Files: ${m.files.map((f) => f.name).join(", ")}`
-          : "";
+        m.files && m.files.length ? `\n  Files: ${m.files.map((f) => f.name).join(", ")}` : "";
       return `[${fmtTime(m.timestamp)}] ${who}:\n  ${m.content}${files}`;
     })
     .join("\n\n");
@@ -50,10 +48,7 @@ export function exportToMarkdown(messages: ChatMessage[]): string {
   return lines.join("\n");
 }
 
-export function downloadChat(
-  messages: ChatMessage[],
-  format: ExportFormat,
-): void {
+export function downloadChat(messages: ChatMessage[], format: ExportFormat): void {
   let content = "";
   let mime = "text/plain";
   let ext = "txt";

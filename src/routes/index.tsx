@@ -14,8 +14,7 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "عزبوت — المساعد الذكي للصيانة" },
       {
         property: "og:description",
-        content:
-          "زر محادثة عائم لإنشاء طلبات الصيانة ومتابعة حالتها بالعربية.",
+        content: "زر محادثة عائم لإنشاء طلبات الصيانة ومتابعة حالتها بالعربية.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

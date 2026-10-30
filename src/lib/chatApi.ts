@@ -1,8 +1,4 @@
-import type {
-  ChatApiRequestMeta,
-  ChatApiResponse,
-  ChatFile,
-} from "@/types/chat";
+import type { ChatApiRequestMeta, ChatApiResponse, ChatFile } from "@/types/chat";
 import { supabase } from "@/integrations/supabase/client";
 import { getChatUploadSignedUrl } from "@/lib/chatUploads.functions";
 import { dispatchMessageToAgent } from "@/lib/agents/dispatcher.functions";
@@ -26,11 +22,7 @@ interface UploadedAttachment {
   size: number;
 }
 
-async function uploadFile(
-  file: File,
-  scope: string,
-  userId: string,
-): Promise<UploadedAttachment> {
+async function uploadFile(file: File, scope: string, userId: string): Promise<UploadedAttachment> {
   const safe = file.name.replace(/[^\w.\-()\s]/g, "_");
   const path = `${userId}/${scope}/${crypto.randomUUID()}-${safe}`;
   const { error } = await supabase.storage
@@ -72,8 +64,7 @@ export async function sendChatMessage({
     attachments.push(await uploadFile(file, scope, authData.user.id));
   }
 
-  const threadId =
-    conversationId && conversationId.includes(".") ? conversationId : null;
+  const threadId = conversationId && conversationId.includes(".") ? conversationId : null;
 
   if (agentId) {
     const attachmentLines = attachments.map(
@@ -123,8 +114,7 @@ export async function sendChatMessage({
 
   return {
     reply: data.reply || "…",
-    conversationId:
-      typeof data.threadId === "string" ? data.threadId : conversationId,
+    conversationId: typeof data.threadId === "string" ? data.threadId : conversationId,
     sources: [],
     actions: [],
   };
@@ -140,8 +130,7 @@ export function fileToChatFile(file: File): Promise<ChatFile> {
     };
     if (file.type.startsWith("image/")) {
       const reader = new FileReader();
-      reader.onload = () =>
-        resolve({ ...base, dataUrl: reader.result as string });
+      reader.onload = () => resolve({ ...base, dataUrl: reader.result as string });
       reader.onerror = () => resolve(base);
       reader.readAsDataURL(file);
     } else {

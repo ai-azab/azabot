@@ -27,7 +27,9 @@ export function Topbar({ title, description, onMenuClick, className }: TopbarPro
         ) : null}
         <div className="min-w-0">
           <h1 className="truncate text-base font-semibold text-foreground">{title}</h1>
-          {description ? <p className="truncate text-xs text-muted-foreground">{description}</p> : null}
+          {description ? (
+            <p className="truncate text-xs text-muted-foreground">{description}</p>
+          ) : null}
         </div>
       </div>
 

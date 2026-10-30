@@ -1,4 +1,11 @@
-import { Download, MessageSquarePlus, Phone, Settings as SettingsIcon, Sparkles, X } from "lucide-react";
+import {
+  Download,
+  MessageSquarePlus,
+  Phone,
+  Settings as SettingsIcon,
+  Sparkles,
+  X,
+} from "lucide-react";
 import { useState } from "react";
 import type { ChatStatus, ExportFormat } from "@/types/chat";
 import { cn } from "@/lib/utils";
@@ -35,7 +42,6 @@ const STATUS_DOT: Record<ChatStatus, string> = {
 
 const PULSING: ChatStatus[] = ["connecting", "streaming"];
 
-
 export function ChatHeader({
   status,
   onClose,
@@ -56,8 +62,7 @@ export function ChatHeader({
     <header
       className="relative flex items-center justify-between gap-2 px-3 py-3 text-white"
       style={{
-        background:
-          "linear-gradient(135deg, #030957 0%, #0a1170 60%, #1a2280 100%)",
+        background: "linear-gradient(135deg, #030957 0%, #0a1170 60%, #1a2280 100%)",
       }}
     >
       <div className="flex min-w-0 items-center gap-2.5">
@@ -80,10 +85,7 @@ export function ChatHeader({
           <div className="truncate whitespace-nowrap font-semibold">Azab Assistant</div>
           <div className="flex items-center gap-1.5 text-xs opacity-90">
             <span
-              className={cn(
-                "h-2 w-2 rounded-full",
-                PULSING.includes(status) && "animate-pulse",
-              )}
+              className={cn("h-2 w-2 rounded-full", PULSING.includes(status) && "animate-pulse")}
               style={{ backgroundColor: STATUS_DOT[status] }}
             />
             {STATUS_LABEL[status]}
@@ -136,11 +138,7 @@ export function ChatHeader({
                     fmt === defaultExportFormat && "font-semibold",
                   )}
                 >
-                  {fmt === "txt"
-                    ? "نص (.txt)"
-                    : fmt === "json"
-                      ? "JSON (.json)"
-                      : "Markdown (.md)"}
+                  {fmt === "txt" ? "نص (.txt)" : fmt === "json" ? "JSON (.json)" : "Markdown (.md)"}
                 </button>
               ))}
             </div>

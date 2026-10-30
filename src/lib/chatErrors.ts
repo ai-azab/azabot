@@ -2,8 +2,7 @@ export type ChatErrorKind = "offline" | "rate_limit" | "generic";
 
 export const CHAT_ERROR_MESSAGES: Record<ChatErrorKind, string> = {
   offline: "لا يوجد اتصال بالإنترنت.",
-  rate_limit:
-    "تم إرسال عدد كبير من الرسائل خلال فترة قصيرة. حاول مرة أخرى بعد قليل.",
+  rate_limit: "تم إرسال عدد كبير من الرسائل خلال فترة قصيرة. حاول مرة أخرى بعد قليل.",
   generic: "تعذر الاتصال بالمساعد حاليًا. حاول مرة أخرى.",
 };
 
@@ -15,8 +14,7 @@ function isOffline(): boolean {
 export function classifyChatError(err: unknown): ChatErrorKind {
   if (isOffline()) return "offline";
 
-  const raw =
-    err instanceof Error ? `${err.name} ${err.message}` : String(err ?? "");
+  const raw = err instanceof Error ? `${err.name} ${err.message}` : String(err ?? "");
   const text = raw.toLowerCase();
 
   if (

@@ -1,21 +1,11 @@
 "use client";
 
-import {
-  ChevronDown,
-  Maximize2,
-  MessageCircle,
-  Phone,
-  X,
-} from "lucide-react";
+import { ChevronDown, Maximize2, MessageCircle, Phone, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-import {
-  AgentPickerPopover,
-  type AgentItem,
-} from "./AgentPickerPopover";
-
+import { AgentPickerPopover, type AgentItem } from "./AgentPickerPopover";
 
 interface ChatButtonProps {
   isOpen: boolean;
@@ -47,9 +37,7 @@ export function ChatButton({
       dir="rtl"
       className={cn(
         "fixed bottom-4 right-4 z-[9999] flex items-end justify-end transition-[width,height] duration-300 motion-reduce:transition-none sm:bottom-5 sm:right-5",
-        isExpanded
-          ? "h-[118px] w-[min(420px,calc(100vw-2rem))]"
-          : "h-[58px] w-[88px]",
+        isExpanded ? "h-[118px] w-[min(420px,calc(100vw-2rem))]" : "h-[58px] w-[88px]",
       )}
       style={{
         paddingBottom: "env(safe-area-inset-bottom)",
@@ -67,10 +55,7 @@ export function ChatButton({
               هل تحتاج إلى مساعدة؟
             </p>
 
-            <span
-              className="h-2 w-2 shrink-0 rounded-full bg-azab-online"
-              aria-label="متصل"
-            />
+            <span className="h-2 w-2 shrink-0 rounded-full bg-azab-online" aria-label="متصل" />
 
             <Button
               type="button"
@@ -91,9 +76,7 @@ export function ChatButton({
               className="h-10 min-w-0 rounded-lg bg-azab-navy px-3 text-xs text-azab-on-navy shadow-none hover:bg-azab-navy-strong"
             >
               <Phone className="h-4 w-4" />
-              <span className="truncate">
-                دعم مكالمة
-              </span>
+              <span className="truncate">دعم مكالمة</span>
             </Button>
 
             <Button
@@ -107,10 +90,7 @@ export function ChatButton({
               <MessageCircle className="h-4 w-4" />
             </Button>
 
-            <AgentPickerPopover
-              selectedAgentId={selectedAgentId}
-              onSelectAgent={onSelectAgent}
-            />
+            <AgentPickerPopover selectedAgentId={selectedAgentId} onSelectAgent={onSelectAgent} />
 
             <Button
               type="button"

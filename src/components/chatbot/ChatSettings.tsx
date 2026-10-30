@@ -1,12 +1,7 @@
 import { useEffect, useState } from "react";
 import { Trash2, Volume2 } from "lucide-react";
-import type {
-  ChatSettingsState,
-  ExportFormat,
-  ThemeMode,
-} from "@/types/chat";
+import type { ChatSettingsState, ExportFormat, ThemeMode } from "@/types/chat";
 import { listVoices, onVoicesChanged, speak } from "@/lib/voice";
-
 
 interface ChatSettingsProps {
   settings: ChatSettingsState;
@@ -15,12 +10,7 @@ interface ChatSettingsProps {
   onClose: () => void;
 }
 
-export function ChatSettings({
-  settings,
-  onChange,
-  onClear,
-  onClose,
-}: ChatSettingsProps) {
+export function ChatSettings({ settings, onChange, onClear, onClose }: ChatSettingsProps) {
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
 
   useEffect(() => {
@@ -29,7 +19,6 @@ export function ChatSettings({
   }, []);
 
   return (
-
     <div
       className="azab-pop-in absolute inset-x-0 top-0 z-10 m-2 rounded-xl border border-black/5 bg-white p-4 text-sm shadow-xl"
       role="dialog"
@@ -52,9 +41,7 @@ export function ChatSettings({
           <input
             type="checkbox"
             checked={settings.voiceReplies}
-            onChange={(e) =>
-              onChange({ ...settings, voiceReplies: e.target.checked })
-            }
+            onChange={(e) => onChange({ ...settings, voiceReplies: e.target.checked })}
             className="h-4 w-4 accent-[#ffb900]"
           />
         </label>
@@ -64,9 +51,7 @@ export function ChatSettings({
           <div className="flex min-w-0 items-center gap-1.5">
             <select
               value={settings.voiceURI ?? ""}
-              onChange={(e) =>
-                onChange({ ...settings, voiceURI: e.target.value })
-              }
+              onChange={(e) => onChange({ ...settings, voiceURI: e.target.value })}
               aria-label="اختيار الصوت"
               className="min-w-0 max-w-[170px] truncate rounded-md border border-black/10 bg-white px-2 py-1 text-[#030957] focus:outline-none focus:ring-2 focus:ring-[#ffb900]"
             >
@@ -79,9 +64,7 @@ export function ChatSettings({
             </select>
             <button
               type="button"
-              onClick={() =>
-                speak("مرحباً، أنا عزبوت.", "ar", settings.voiceURI)
-              }
+              onClick={() => speak("مرحباً، أنا عزبوت.", "ar", settings.voiceURI)}
               aria-label="تجربة الصوت"
               title="تجربة الصوت"
               className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[#030957]/70 transition hover:bg-[#030957]/5 hover:text-[#030957] focus:outline-none focus:ring-2 focus:ring-[#ffb900]"
@@ -90,8 +73,6 @@ export function ChatSettings({
             </button>
           </div>
         </div>
-
-
 
         <label className="flex items-center justify-between gap-3">
           <span className="text-[#030957]">صيغة التصدير الافتراضية</span>

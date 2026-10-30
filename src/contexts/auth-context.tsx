@@ -9,7 +9,7 @@ import {
   readSupabaseSession,
   type SessionSnapshot,
 } from "@/lib/supabase/session";
-import type { AppRole } from "@/lib/auth/roles";
+import { APP_ROLES, type AppRole } from "@/lib/auth/roles";
 
 interface AuthContextValue {
   session: Session | null;
@@ -25,19 +25,18 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 async function resolveRole(user: User | null): Promise<AppRole | null> {
   if (!user) return null;
 
-  const roles: AppRole[] = ["super_admin", "admin", "manager", "support", "user"];
-  for (const role of roles) {
-    const { data, error } = await supabase.rpc("has_role", {
-      _user_id: user.id,
-      _role: role,
-    });
+  const checks = await Promise.all(
+    APP_ROLES.map(async (role) => {
+      const { data, error } = await supabase.rpc("has_role", {
+        _user_id: user.id,
+        _role: role,
+      });
+      return !error && Boolean(data);
+    }),
+  );
 
-    if (!error && data) {
-      return role;
-    }
-  }
-
-  return null;
+  const index = checks.findIndex(Boolean);
+  return index === -1 ? null : APP_ROLES[index];
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {

@@ -14,19 +14,14 @@ type SpeechRecognitionLike = {
 
 export function getSpeechRecognition(): SpeechRecognitionLike | null {
   if (typeof window === "undefined") return null;
-  const Ctor =
-    (window as any).SpeechRecognition ||
-    (window as any).webkitSpeechRecognition;
+  const Ctor = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
   if (!Ctor) return null;
   return new Ctor() as SpeechRecognitionLike;
 }
 
 export function isSpeechRecognitionSupported(): boolean {
   if (typeof window === "undefined") return false;
-  return Boolean(
-    (window as any).SpeechRecognition ||
-      (window as any).webkitSpeechRecognition,
-  );
+  return Boolean((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition);
 }
 
 export function isSpeechSynthesisSupported(): boolean {
@@ -42,15 +37,10 @@ export function listVoices(): SpeechSynthesisVoice[] {
 export function onVoicesChanged(cb: () => void): () => void {
   if (!isSpeechSynthesisSupported()) return () => {};
   window.speechSynthesis.addEventListener("voiceschanged", cb);
-  return () =>
-    window.speechSynthesis.removeEventListener("voiceschanged", cb);
+  return () => window.speechSynthesis.removeEventListener("voiceschanged", cb);
 }
 
-export function speak(
-  text: string,
-  lang: "ar" | "en" = "ar",
-  voiceURI?: string,
-): void {
+export function speak(text: string, lang: "ar" | "en" = "ar", voiceURI?: string): void {
   if (!isSpeechSynthesisSupported()) return;
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = lang === "ar" ? "ar-SA" : "en-US";
@@ -64,7 +54,6 @@ export function speak(
   window.speechSynthesis.cancel();
   window.speechSynthesis.speak(utterance);
 }
-
 
 export function stopSpeaking(): void {
   if (!isSpeechSynthesisSupported()) return;

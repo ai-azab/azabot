@@ -12,7 +12,12 @@ const PATH_RE = /^[A-Za-z0-9_.\-/() ]+$/;
 export const getChatUploadSignedUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: { path: string }) => {
-    if (!data || typeof data.path !== "string" || data.path.length === 0 || data.path.length > 512) {
+    if (
+      !data ||
+      typeof data.path !== "string" ||
+      data.path.length === 0 ||
+      data.path.length > 512
+    ) {
       throw new Error("Invalid path");
     }
     if (data.path.includes("..") || !PATH_RE.test(data.path)) {

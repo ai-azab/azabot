@@ -42,7 +42,10 @@ function IntegrationPage() {
       next.endpoint = "مطلوب";
     } else if (!/^https?:\/\/.+/i.test(ep)) {
       next.endpoint = "يجب أن يبدأ بـ https:// أو http://";
-    } else if (!/^https?:\/\/[^\s]+\.openai\.azure\.com\/?.*$/i.test(ep) && !/^https?:\/\/[^\s]+$/i.test(ep)) {
+    } else if (
+      !/^https?:\/\/[^\s]+\.openai\.azure\.com\/?.*$/i.test(ep) &&
+      !/^https?:\/\/[^\s]+$/i.test(ep)
+    ) {
       // Allow any https endpoint but warn if not azure-like
       // We keep this loose since custom domains exist
     }
@@ -135,8 +138,8 @@ function IntegrationPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold">إعدادات الدمج مع Azure OpenAI</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          أدخل بيانات الاعتماد الخاصة بمشروعك في Azure OpenAI Service. يتم حفظ الإعدادات
-          محلياً في المتصفح ولا تُرسل إلا إلى نقطة الـ Endpoint التي حددتها.
+          أدخل بيانات الاعتماد الخاصة بمشروعك في Azure OpenAI Service. يتم حفظ الإعدادات محلياً في
+          المتصفح ولا تُرسل إلا إلى نقطة الـ Endpoint التي حددتها.
         </p>
       </div>
 
@@ -159,7 +162,11 @@ function IntegrationPage() {
           />
         </label>
 
-        <Field label="Endpoint" hint="مثال: https://my-resource.openai.azure.com" error={touched.endpoint ? errors.endpoint : undefined}>
+        <Field
+          label="Endpoint"
+          hint="مثال: https://my-resource.openai.azure.com"
+          error={touched.endpoint ? errors.endpoint : undefined}
+        >
           <input
             type="url"
             required
@@ -194,7 +201,11 @@ function IntegrationPage() {
         </Field>
 
         <div className="grid gap-5 sm:grid-cols-2">
-          <Field label="Deployment Name" hint="اسم النشر داخل Azure" error={touched.deployment ? errors.deployment : undefined}>
+          <Field
+            label="Deployment Name"
+            hint="اسم النشر داخل Azure"
+            error={touched.deployment ? errors.deployment : undefined}
+          >
             <input
               type="text"
               required

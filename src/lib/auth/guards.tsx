@@ -35,5 +35,5 @@ export async function requireRoles(roles: AppRole[], redirectTo = "/") {
 }
 
 export async function requireAdminSession() {
-  return requireRoles(["super_admin", "admin"]);
+  return requireRoles(["admin"]);
 }

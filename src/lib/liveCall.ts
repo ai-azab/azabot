@@ -26,9 +26,7 @@ interface RealtimeEvent {
  * Realtime session minted server-side. Throws a controlled local error when
  * Realtime is unavailable so the caller can fall back without a server 500.
  */
-export async function startLiveCall(
-  callbacks: LiveCallCallbacks,
-): Promise<LiveCallHandle> {
+export async function startLiveCall(callbacks: LiveCallCallbacks): Promise<LiveCallHandle> {
   if (typeof window === "undefined" || !window.RTCPeerConnection) {
     throw new Error("WEBRTC_UNSUPPORTED");
   }

@@ -23,9 +23,7 @@ function gatewayConfig() {
   return { url, key };
 }
 
-async function callGateway(
-  payload: Record<string, unknown>,
-): Promise<Record<string, unknown>> {
+async function callGateway(payload: Record<string, unknown>): Promise<Record<string, unknown>> {
   const { url, key } = gatewayConfig();
   const res = await fetch(url, {
     method: "POST",
@@ -57,9 +55,7 @@ async function callGateway(
     request_number: str(body["request_number"], 100) || undefined,
     status: str(body["status"], 100) || undefined,
     workflow_stage:
-      str(body["workflow_stage_v2"], 100) ||
-      str(body["workflow_stage"], 100) ||
-      undefined,
+      str(body["workflow_stage_v2"], 100) || str(body["workflow_stage"], 100) || undefined,
     track_url: safeTrackingUrl(body["track_url"]),
     message: str(body["message_ar"], 500) || str(body["message"], 500) || undefined,
   };
@@ -187,9 +183,7 @@ export async function runMaintenanceTool(
             ? service_type
             : "other",
           description,
-          priority: (PRIORITIES as readonly string[]).includes(priority)
-            ? priority
-            : "medium",
+          priority: (PRIORITIES as readonly string[]).includes(priority) ? priority : "medium",
         });
       }
       case "get_maintenance_status": {
@@ -235,8 +229,7 @@ export async function runMaintenanceTool(
 
 export function maintenanceToolsAvailable(): boolean {
   return Boolean(
-    process.env["MAINTENANCE_GATEWAY_URL"] &&
-      process.env["MAINTENANCE_GATEWAY_API_KEY"],
+    process.env["MAINTENANCE_GATEWAY_URL"] && process.env["MAINTENANCE_GATEWAY_API_KEY"],
   );
 }
 

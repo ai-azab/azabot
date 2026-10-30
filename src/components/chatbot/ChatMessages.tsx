@@ -1,14 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  ArrowDown,
-  Bot,
-  FileText,
-  Pause,
-  RotateCcw,
-  Sparkles,
-  User,
-  Volume2,
-} from "lucide-react";
+import { ArrowDown, Bot, FileText, Pause, RotateCcw, Sparkles, User, Volume2 } from "lucide-react";
 import type { ChatMessage } from "@/types/chat";
 import { cn } from "@/lib/utils";
 
@@ -64,9 +55,7 @@ function EmptyState({ onSuggestion }: { onSuggestion?: (t: string) => void }) {
         <div className="text-lg font-bold" style={{ color: "#030957" }}>
           مرحباً! أنا Azab 👋
         </div>
-        <div className="mt-1 text-sm text-muted-foreground">
-          كيف يمكنني مساعدتك اليوم؟
-        </div>
+        <div className="mt-1 text-sm text-muted-foreground">كيف يمكنني مساعدتك اليوم؟</div>
       </div>
       {onSuggestion && (
         <div className="mt-2 flex w-full flex-wrap justify-center gap-2">
@@ -172,123 +161,115 @@ export function ChatMessages({
         onScroll={handleScroll}
         className="azab-scroll flex-1 space-y-4 overflow-y-auto overflow-x-hidden px-4 py-4 overscroll-contain"
       >
-
-      {messages.map((m) => {
-        const isUser = m.role === "user";
-        const isSpeaking = speakingMessageId === m.id;
-        const dir = /[\u0600-\u06FF]/.test(m.content) ? "rtl" : "ltr";
-        return (
-          <div
-            key={m.id}
-            className={cn(
-              "azab-fade-up flex items-end gap-2",
-              isUser ? "flex-row-reverse" : "flex-row",
-            )}
-          >
+        {messages.map((m) => {
+          const isUser = m.role === "user";
+          const isSpeaking = speakingMessageId === m.id;
+          const dir = /[\u0600-\u06FF]/.test(m.content) ? "rtl" : "ltr";
+          return (
             <div
-              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full shadow-sm"
-              style={{
-                backgroundColor: isUser ? "#030957" : "#ffb900",
-                color: isUser ? "#ffffff" : "#030957",
-              }}
-              aria-hidden
-            >
-              {isUser ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
-            </div>
-
-            <div
+              key={m.id}
               className={cn(
-                "flex max-w-[78%] flex-col gap-1",
-                isUser ? "items-end" : "items-start",
+                "azab-fade-up flex items-end gap-2",
+                isUser ? "flex-row-reverse" : "flex-row",
               )}
             >
               <div
-                dir={dir}
-                className="whitespace-pre-wrap break-words rounded-2xl px-4 py-2.5 text-sm leading-relaxed shadow-sm"
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full shadow-sm"
                 style={{
-                  background: m.failed
-                    ? "#fef2f2"
-                    : isUser
-                      ? "linear-gradient(135deg, #030957 0%, #1a2280 100%)"
-                      : "var(--azab-assistant-bubble)",
-                  color: m.failed ? "#b91c1c" : isUser ? "#ffffff" : "#030957",
-                  borderBottomRightRadius: isUser ? 6 : undefined,
-                  borderBottomLeftRadius: !isUser ? 6 : undefined,
+                  backgroundColor: isUser ? "#030957" : "#ffb900",
+                  color: isUser ? "#ffffff" : "#030957",
                 }}
+                aria-hidden
               >
-                {m.content}
-
-                {m.files && m.files.length > 0 && (
-                  <div className="mt-2 space-y-1.5">
-                    {m.files.map((f) => (
-                      <div
-                        key={f.id}
-                        className={cn(
-                          "flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs",
-                          isUser ? "bg-white/15" : "bg-white",
-                        )}
-                      >
-                        {f.dataUrl ? (
-                          <img
-                            src={f.dataUrl}
-                            alt={f.name}
-                            className="h-8 w-8 rounded object-cover"
-                          />
-                        ) : (
-                          <FileText className="h-4 w-4 shrink-0" />
-                        )}
-                        <span className="truncate">{f.name}</span>
-                        <span className="ms-auto opacity-70">
-                          {formatBytes(f.size)}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                {isUser ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
               </div>
-
-              {m.failed && onRetry && (
-                <button
-                  type="button"
-                  onClick={() => onRetry(m)}
-                  className="flex min-h-[36px] items-center gap-1.5 rounded-full border border-red-200 bg-white px-3 py-1.5 text-xs font-medium text-red-600 shadow-sm transition hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-[#ffb900]"
-                >
-                  <RotateCcw className="h-3.5 w-3.5" />
-                  إعادة المحاولة
-                </button>
-              )}
 
               <div
                 className={cn(
-                  "flex items-center gap-2 px-1 text-[10px] text-muted-foreground",
-                  isUser ? "flex-row-reverse" : "flex-row",
+                  "flex max-w-[78%] flex-col gap-1",
+                  isUser ? "items-end" : "items-start",
                 )}
               >
-                <span>{formatTime(m.timestamp)}</span>
-                {!isUser && !m.failed && voiceRepliesEnabled && (
+                <div
+                  dir={dir}
+                  className="whitespace-pre-wrap break-words rounded-2xl px-4 py-2.5 text-sm leading-relaxed shadow-sm"
+                  style={{
+                    background: m.failed
+                      ? "#fef2f2"
+                      : isUser
+                        ? "linear-gradient(135deg, #030957 0%, #1a2280 100%)"
+                        : "var(--azab-assistant-bubble)",
+                    color: m.failed ? "#b91c1c" : isUser ? "#ffffff" : "#030957",
+                    borderBottomRightRadius: isUser ? 6 : undefined,
+                    borderBottomLeftRadius: !isUser ? 6 : undefined,
+                  }}
+                >
+                  {m.content}
+
+                  {m.files && m.files.length > 0 && (
+                    <div className="mt-2 space-y-1.5">
+                      {m.files.map((f) => (
+                        <div
+                          key={f.id}
+                          className={cn(
+                            "flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs",
+                            isUser ? "bg-white/15" : "bg-white",
+                          )}
+                        >
+                          {f.dataUrl ? (
+                            <img
+                              src={f.dataUrl}
+                              alt={f.name}
+                              className="h-8 w-8 rounded object-cover"
+                            />
+                          ) : (
+                            <FileText className="h-4 w-4 shrink-0" />
+                          )}
+                          <span className="truncate">{f.name}</span>
+                          <span className="ms-auto opacity-70">{formatBytes(f.size)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {m.failed && onRetry && (
                   <button
                     type="button"
-                    onClick={() => onToggleSpeak(m)}
-                    aria-label={isSpeaking ? "إيقاف القراءة" : "قراءة الرد"}
-                    className="rounded p-0.5 text-[#030957]/60 transition hover:bg-[#030957]/5 hover:text-[#030957] focus:outline-none focus:ring-2 focus:ring-[#ffb900]"
+                    onClick={() => onRetry(m)}
+                    className="flex min-h-[36px] items-center gap-1.5 rounded-full border border-red-200 bg-white px-3 py-1.5 text-xs font-medium text-red-600 shadow-sm transition hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-[#ffb900]"
                   >
-                    {isSpeaking ? (
-                      <Pause className="h-3 w-3" />
-                    ) : (
-                      <Volume2 className="h-3 w-3" />
-                    )}
+                    <RotateCcw className="h-3.5 w-3.5" />
+                    إعادة المحاولة
                   </button>
                 )}
+
+                <div
+                  className={cn(
+                    "flex items-center gap-2 px-1 text-[10px] text-muted-foreground",
+                    isUser ? "flex-row-reverse" : "flex-row",
+                  )}
+                >
+                  <span>{formatTime(m.timestamp)}</span>
+                  {!isUser && !m.failed && voiceRepliesEnabled && (
+                    <button
+                      type="button"
+                      onClick={() => onToggleSpeak(m)}
+                      aria-label={isSpeaking ? "إيقاف القراءة" : "قراءة الرد"}
+                      className="rounded p-0.5 text-[#030957]/60 transition hover:bg-[#030957]/5 hover:text-[#030957] focus:outline-none focus:ring-2 focus:ring-[#ffb900]"
+                    >
+                      {isSpeaking ? <Pause className="h-3 w-3" /> : <Volume2 className="h-3 w-3" />}
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
 
         {isThinking && <TypingIndicator />}
         <div ref={bottomRef} />
       </div>
     </div>
   );
-
 }

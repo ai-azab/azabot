@@ -1,11 +1,4 @@
-export type AgentSlug =
-  | "azabot"
-  | "payments"
-  | "project"
-  | "bim"
-  | "maint"
-  | "prod"
-  | "finance";
+export type AgentSlug = "azabot" | "payments" | "project" | "bim" | "maint" | "prod" | "finance";
 
 export interface AgentDefinition {
   slug: AgentSlug;

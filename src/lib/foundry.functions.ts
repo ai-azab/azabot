@@ -146,9 +146,7 @@ function extractText(res: ResponsesResult): string {
   if (typeof res.output_text === "string" && res.output_text.trim()) {
     return res.output_text.trim();
   }
-  const items = (res.output ?? []).filter(
-    (i) => i.role === "assistant" || i.type === "message",
-  );
+  const items = (res.output ?? []).filter((i) => i.role === "assistant" || i.type === "message");
   const finals = items.filter((i) => i.phase === "final_answer");
   const parts: string[] = [];
   for (const item of finals.length ? finals : items) {
@@ -181,9 +179,7 @@ async function runWithTools(
       body: JSON.stringify(body),
     });
 
-    const calls = (result.output ?? []).filter(
-      (i) => i.type === "function_call" && i.name,
-    );
+    const calls = (result.output ?? []).filter((i) => i.type === "function_call" && i.name);
     if (!calls.length) return { response: result, executions };
 
     const followUp: Array<Record<string, unknown>> = [];
@@ -245,17 +241,27 @@ function maintenanceReply(executions: MaintenanceExecution[]): string | null {
     if (status) lines.push(`الحالة: ${status}`);
     if (stage && stage !== status) lines.push(`المرحلة الحالية: ${stage}`);
     if (trackingUrl) lines.push(`رابط المتابعة: ${trackingUrl}`);
-    return lines.length > 1 ? lines.join("\n") : "تم العثور على الطلب، لكن تفاصيل حالته غير متاحة حالياً.";
+    return lines.length > 1
+      ? lines.join("\n")
+      : "تم العثور على الطلب، لكن تفاصيل حالته غير متاحة حالياً.";
   }
 
   if (name === "add_maintenance_note") {
-    return ["تمت إضافة الملاحظة إلى طلب الصيانة ✅", requestNumber ? `رقم الطلب: ${requestNumber}` : "", trackingUrl ? `رابط المتابعة: ${trackingUrl}` : ""]
+    return [
+      "تمت إضافة الملاحظة إلى طلب الصيانة ✅",
+      requestNumber ? `رقم الطلب: ${requestNumber}` : "",
+      trackingUrl ? `رابط المتابعة: ${trackingUrl}` : "",
+    ]
       .filter(Boolean)
       .join("\n");
   }
 
   if (name === "cancel_maintenance_request") {
-    return ["تم إلغاء طلب الصيانة ✅", requestNumber ? `رقم الطلب: ${requestNumber}` : "", trackingUrl ? `رابط المتابعة: ${trackingUrl}` : ""]
+    return [
+      "تم إلغاء طلب الصيانة ✅",
+      requestNumber ? `رقم الطلب: ${requestNumber}` : "",
+      trackingUrl ? `رابط المتابعة: ${trackingUrl}` : "",
+    ]
       .filter(Boolean)
       .join("\n");
   }
@@ -298,9 +304,7 @@ export const foundryChat = createServerFn({ method: "POST" })
 
     return {
       threadId:
-        typeof data.threadId === "string" && data.threadId.length <= 512
-          ? data.threadId
-          : null,
+        typeof data.threadId === "string" && data.threadId.length <= 512 ? data.threadId : null,
       agentId,
       message: message.slice(0, 8000),
       attachments,
@@ -312,9 +316,7 @@ export const foundryChat = createServerFn({ method: "POST" })
       const agent = await resolveAgent(data.agentId);
 
       const agentName =
-        agent?.agent_name ||
-        process.env.FOUNDRY_AGENT_NAME ||
-        process.env.FOUNDRY_AGENT_ID;
+        agent?.agent_name || process.env.FOUNDRY_AGENT_NAME || process.env.FOUNDRY_AGENT_ID;
       if (!agentName) throw new Error("FOUNDRY_AGENT_NAME is not configured");
       const agentVersion =
         agent?.agent_version ||
@@ -333,8 +335,7 @@ export const foundryChat = createServerFn({ method: "POST" })
         }
       }
       const text =
-        (data.message || "") +
-        (fileList.length ? `\n\nالمرفقات:\n${fileList.join("\n")}` : "");
+        (data.message || "") + (fileList.length ? `\n\nالمرفقات:\n${fileList.join("\n")}` : "");
       contentParts.unshift({ type: "input_text", text: text || "..." });
 
       const userItem = {
@@ -344,9 +345,7 @@ export const foundryChat = createServerFn({ method: "POST" })
       };
 
       // 2) Ensure a conversation — verify the caller's signed token or mint a new one.
-      let conversationId: string | null = data.threadId
-        ? verifyThreadToken(data.threadId)
-        : null;
+      let conversationId: string | null = data.threadId ? verifyThreadToken(data.threadId) : null;
       if (!conversationId) {
         const conv = await foundryFetch<{ id: string }>("/conversations", {
           method: "POST",
@@ -381,10 +380,7 @@ export const foundryChat = createServerFn({ method: "POST" })
           }
         : null;
       if (fallbackBody) {
-        const instructions = [
-          agent?.system_prompt ?? "",
-          toolsOn ? MAINTENANCE_GUIDANCE : "",
-        ]
+        const instructions = [agent?.system_prompt ?? "", toolsOn ? MAINTENANCE_GUIDANCE : ""]
           .filter(Boolean)
           .join("\n\n");
         if (instructions) fallbackBody.instructions = instructions;

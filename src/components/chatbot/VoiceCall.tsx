@@ -61,10 +61,7 @@ export function VoiceCall({
     setCaption("");
     setState("connecting");
     const startedAt = Date.now();
-    const timer = setInterval(
-      () => setDuration(Math.floor((Date.now() - startedAt) / 1000)),
-      1000,
-    );
+    const timer = setInterval(() => setDuration(Math.floor((Date.now() - startedAt) / 1000)), 1000);
 
     // Prefer a true live (full-duplex) realtime call; fall back to the
     // speech-recognition turn loop when realtime isn't available.
@@ -292,8 +289,7 @@ export function VoiceCall({
       aria-label="مكالمة صوتية مع Azab Assistant"
       className="absolute inset-0 z-20 flex flex-col items-center justify-between overflow-x-hidden p-6 text-white"
       style={{
-        background:
-          "linear-gradient(160deg, #030957 0%, #0a1170 55%, #1a2280 100%)",
+        background: "linear-gradient(160deg, #030957 0%, #0a1170 55%, #1a2280 100%)",
         paddingBottom: "max(1.5rem, env(safe-area-inset-bottom))",
       }}
     >
@@ -313,8 +309,8 @@ export function VoiceCall({
               state === "listening"
                 ? "animate-ping bg-[#ffb900]/40"
                 : state === "speaking"
-                ? "animate-pulse bg-white/20"
-                : ""
+                  ? "animate-pulse bg-white/20"
+                  : ""
             }`}
           />
           <div

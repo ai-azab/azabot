@@ -9,9 +9,7 @@ export const Route = createFileRoute("/auth")({
   ssr: false,
   validateSearch: (search: Record<string, unknown>): AuthSearch => {
     const reason = search.reason;
-    return reason === "forbidden" || reason === "error" || reason === "signin"
-      ? { reason }
-      : {};
+    return reason === "forbidden" || reason === "error" || reason === "signin" ? { reason } : {};
   },
   head: () => ({
     meta: [
@@ -84,9 +82,7 @@ function AuthPage() {
     });
     setResetting(false);
     setNotice(
-      resetError
-        ? null
-        : `تم إرسال رابط إعادة تعيين كلمة المرور إلى ${target}. تحقق من بريدك.`,
+      resetError ? null : `تم إرسال رابط إعادة تعيين كلمة المرور إلى ${target}. تحقق من بريدك.`,
     );
     if (resetError) setError("تعذر إرسال رابط إعادة التعيين حاليًا.");
   };

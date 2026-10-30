@@ -3,8 +3,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.110.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-api-key",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-api-key",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
 };
 
@@ -42,25 +41,19 @@ function getPublishableKey(): string {
     }
   }
 
-  const key =
-    Deno.env.get("SUPABASE_PUBLISHABLE_KEY") ??
-    Deno.env.get("SUPABASE_ANON_KEY");
+  const key = Deno.env.get("SUPABASE_PUBLISHABLE_KEY") ?? Deno.env.get("SUPABASE_ANON_KEY");
 
   if (!key) throw new Error("Supabase publishable key is not configured");
   return key;
 }
 
 function getSupabaseClient() {
-  return createClient(
-    requireEnv("SUPABASE_URL"),
-    getPublishableKey(),
-    {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-      },
+  return createClient(requireEnv("SUPABASE_URL"), getPublishableKey(), {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
     },
-  );
+  });
 }
 
 async function requireUser(request: Request): Promise<string | null> {
@@ -210,9 +203,7 @@ async function runChat(input: {
   attachments: ReturnType<typeof normalizeAttachments>;
 }) {
   const agentId = requireEnv("FOUNDRY_AGENT_ID");
-  let threadId = input.threadToken
-    ? await verifyThreadToken(input.threadToken)
-    : null;
+  let threadId = input.threadToken ? await verifyThreadToken(input.threadToken) : null;
 
   if (!threadId) threadId = await createThread();
 
@@ -245,13 +236,10 @@ async function runChat(input: {
     body: JSON.stringify({ role: "user", content }),
   });
 
-  const run = await foundryFetch<{ id?: string; status?: string }>(
-    `/threads/${threadId}/runs`,
-    {
-      method: "POST",
-      body: JSON.stringify({ assistant_id: agentId }),
-    },
-  );
+  const run = await foundryFetch<{ id?: string; status?: string }>(`/threads/${threadId}/runs`, {
+    method: "POST",
+    body: JSON.stringify({ assistant_id: agentId }),
+  });
 
   if (!run.id) throw new Error("UPSTREAM_ERROR");
 
@@ -357,9 +345,7 @@ async function handle(request: Request): Promise<Response> {
   }
 
   const threadToken =
-    typeof data.threadId === "string" && data.threadId.length <= 512
-      ? data.threadId
-      : null;
+    typeof data.threadId === "string" && data.threadId.length <= 512 ? data.threadId : null;
 
   try {
     const result = await runChat({
@@ -370,10 +356,7 @@ async function handle(request: Request): Promise<Response> {
     return json(result);
   } catch (error) {
     console.error("[chatbot] request failed:", error);
-    return json(
-      { error: "تعذر معالجة الطلب حالياً، يرجى المحاولة لاحقاً." },
-      500,
-    );
+    return json({ error: "تعذر معالجة الطلب حالياً، يرجى المحاولة لاحقاً." }, 500);
   }
 }
 

@@ -47,10 +47,7 @@ function AdminChatPage() {
     queryFn: () => fetchAgents(),
   });
 
-  const activeAgents = useMemo(
-    () => (agents.data ?? []).filter((a) => a.is_active),
-    [agents.data],
-  );
+  const activeAgents = useMemo(() => (agents.data ?? []).filter((a) => a.is_active), [agents.data]);
 
   const [agentId, setAgentId] = useState<string>("");
   const [msgs, setMsgs] = useState<Msg[]>([]);
@@ -217,7 +214,12 @@ function AdminChatPage() {
               label="إعادة توليد"
               disabled={loading || msgs.length === 0}
             />
-            <ToolBtn onClick={exportChat} icon={Download} label="تصدير" disabled={msgs.length === 0} />
+            <ToolBtn
+              onClick={exportChat}
+              icon={Download}
+              label="تصدير"
+              disabled={msgs.length === 0}
+            />
             <ToolBtn
               onClick={() => setMsgs([])}
               icon={Trash2}
@@ -232,9 +234,7 @@ function AdminChatPage() {
           {msgs.length === 0 && (
             <div className="grid h-full place-items-center text-center text-sm text-muted-foreground">
               <div>
-                <div className="text-base font-semibold text-[#030957]">
-                  اختبر الوكيل قبل النشر
-                </div>
+                <div className="text-base font-semibold text-[#030957]">اختبر الوكيل قبل النشر</div>
                 <p className="mt-1">
                   أرسل رسالة أو مرفقاً، وقس زمن الاستجابة، وصدّر المحادثة عند الحاجة.
                 </p>

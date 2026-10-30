@@ -9,8 +9,7 @@ export const Route = createFileRoute("/embed")({
       { title: "عزبوت — نافذة الدردشة المدمجة" },
       {
         name: "description",
-        content:
-          "نافذة الدردشة المدمجة لمساعد عزبوت، تُحمَّل داخل أي موقع عبر كود التضمين.",
+        content: "نافذة الدردشة المدمجة لمساعد عزبوت، تُحمَّل داخل أي موقع عبر كود التضمين.",
       },
       { name: "robots", content: "noindex, nofollow" },
       { property: "og:title", content: "عزبوت — نافذة الدردشة المدمجة" },
@@ -37,10 +36,11 @@ function EmbedPage() {
   }, []);
 
   const notify = (open: boolean) => {
-    window.parent?.postMessage(
-      { source: "azabot", type: open ? "open" : "close" },
-      "*",
-    );
+    window.parent?.postMessage({ source: "azabot", type: open ? "open" : "close" }, "*");
+  };
+
+  const notifyState = (state: "collapsed" | "expanded" | "open") => {
+    window.parent?.postMessage({ source: "azabot", type: "layout", state }, "*");
   };
 
   const notifyState = (state: "collapsed" | "expanded" | "open") => {

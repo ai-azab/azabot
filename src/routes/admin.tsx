@@ -49,7 +49,6 @@ const navItems = [
   { to: "/admin/integration", label: "إعدادات Azure OpenAI", icon: Plug },
 ];
 
-
 function AdminLayout() {
   return (
     <div dir="rtl" className="min-h-dvh bg-[#f4f5fb] text-[#030957]">

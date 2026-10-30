@@ -186,7 +186,11 @@ function StatCard({
         {icon}
       </div>
       <div className={small ? "mt-2 text-lg font-bold" : "mt-2 text-3xl font-bold"}>
-        {loading ? <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /> : (value ?? "—")}
+        {loading ? (
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        ) : (
+          (value ?? "—")
+        )}
       </div>
       {hint && <div className="mt-1 text-xs text-muted-foreground">{hint}</div>}
     </div>

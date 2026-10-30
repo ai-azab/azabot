@@ -180,59 +180,126 @@
 }
 
 @keyframes azab-typing {
-  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
-  30% { transform: translateY(-4px); opacity: 1; }
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
 }
 
 .azab-typing-dot {
   animation: azab-typing 1.2s infinite ease-in-out;
 }
-.azab-typing-dot:nth-child(2) { animation-delay: 0.15s; }
-.azab-typing-dot:nth-child(3) { animation-delay: 0.3s; }
+.azab-typing-dot:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.azab-typing-dot:nth-child(3) {
+  animation-delay: 0.3s;
+}
 
 @keyframes azab-pop-in {
-  from { opacity: 0; transform: translateY(8px) scale(0.98); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
-.azab-pop-in { animation: azab-pop-in 0.18s ease-out; }
+.azab-pop-in {
+  animation: azab-pop-in 0.18s ease-out;
+}
 
 @keyframes azab-pulse-ring {
-  0% { box-shadow: 0 0 0 0 rgba(255, 185, 0, 0.55); }
-  70% { box-shadow: 0 0 0 14px rgba(255, 185, 0, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(255, 185, 0, 0); }
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 185, 0, 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 14px rgba(255, 185, 0, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 185, 0, 0);
+  }
 }
-.azab-pulse { animation: azab-pulse-ring 1.4s infinite; }
+.azab-pulse {
+  animation: azab-pulse-ring 1.4s infinite;
+}
 
 @keyframes azab-float-pulse {
-  0%, 100% { box-shadow: 0 12px 32px -8px rgba(3, 9, 87, 0.45), 0 0 0 0 rgba(255, 185, 0, 0.4); }
-  50% { box-shadow: 0 12px 32px -8px rgba(3, 9, 87, 0.45), 0 0 0 10px rgba(255, 185, 0, 0); }
+  0%,
+  100% {
+    box-shadow:
+      0 12px 32px -8px rgba(3, 9, 87, 0.45),
+      0 0 0 0 rgba(255, 185, 0, 0.4);
+  }
+  50% {
+    box-shadow:
+      0 12px 32px -8px rgba(3, 9, 87, 0.45),
+      0 0 0 10px rgba(255, 185, 0, 0);
+  }
 }
-.azab-float-pulse { animation: azab-float-pulse 2.4s ease-out infinite; }
+.azab-float-pulse {
+  animation: azab-float-pulse 2.4s ease-out infinite;
+}
 
 /* Refined scrollbar inside chat window */
-.azab-scroll::-webkit-scrollbar { width: 6px; }
-.azab-scroll::-webkit-scrollbar-track { background: transparent; }
+.azab-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.azab-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
 .azab-scroll::-webkit-scrollbar-thumb {
   background: rgba(3, 9, 87, 0.15);
   border-radius: 999px;
 }
-.azab-scroll::-webkit-scrollbar-thumb:hover { background: rgba(3, 9, 87, 0.3); }
-.azab-scroll { scrollbar-width: thin; scrollbar-color: rgba(3, 9, 87, 0.2) transparent; }
+.azab-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(3, 9, 87, 0.3);
+}
+.azab-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(3, 9, 87, 0.2) transparent;
+}
 
 @keyframes azab-fade-up {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-.azab-fade-up { animation: azab-fade-up 0.25s ease-out both; }
+.azab-fade-up {
+  animation: azab-fade-up 0.25s ease-out both;
+}
 
 @keyframes azab-launcher-expand {
-  from { opacity: 0; transform: scale(0.92) translateY(8px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 @keyframes azab-launcher-breathe {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-2px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
 }
 
 .azab-launcher-expand {
@@ -240,11 +307,13 @@
   transform-origin: bottom right;
 }
 
-.azab-launcher-breathe { animation: azab-launcher-breathe 3s ease-in-out infinite; }
+.azab-launcher-breathe {
+  animation: azab-launcher-breathe 3s ease-in-out infinite;
+}
 
 @media (prefers-reduced-motion: reduce) {
   .azab-launcher-expand,
-  .azab-launcher-breathe { animation: none; }
+  .azab-launcher-breathe {
+    animation: none;
+  }
 }
-
-

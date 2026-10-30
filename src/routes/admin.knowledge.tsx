@@ -103,7 +103,7 @@ function KnowledgePage() {
     setUploadError(null);
     try {
       for (const file of Array.from(fList)) {
-        const safeName = file.name.replace(/[^\w.\-]+/g, "_");
+        const safeName = file.name.replace(/[^\w.-]+/g, "_");
         const key = `${Date.now()}_${safeName}`;
         const { error: upErr } = await supabase.storage
           .from(BUCKET)
@@ -111,15 +111,10 @@ function KnowledgePage() {
         if (upErr) throw upErr;
 
         // If it's a text-like file, extract preview content for KB context.
-        if (
-          file.type.startsWith("text/") ||
-          /\.(md|txt|json|csv|yaml|yml)$/i.test(file.name)
-        ) {
+        if (file.type.startsWith("text/") || /\.(md|txt|json|csv|yaml|yml)$/i.test(file.name)) {
           try {
             const text = await file.text();
-            setKbContext((prev) =>
-              `${prev}\n\n### ${file.name}\n${text.slice(0, 4000)}`.trim(),
-            );
+            setKbContext((prev) => `${prev}\n\n### ${file.name}\n${text.slice(0, 4000)}`.trim());
           } catch {
             /* ignore */
           }
@@ -147,9 +142,7 @@ function KnowledgePage() {
 
   const handleDownload = async (path: string) => {
     try {
-      const { data, error: err } = await supabase.storage
-        .from(BUCKET)
-        .createSignedUrl(path, 300);
+      const { data, error: err } = await supabase.storage.from(BUCKET).createSignedUrl(path, 300);
       if (err) throw err;
       if (data?.signedUrl) window.open(data.signedUrl, "_blank", "noopener");
     } catch (err) {
@@ -263,8 +256,8 @@ function KnowledgePage() {
                   درّب البوت على محتوى مؤسستك
                 </div>
                 <p className="mt-1">
-                  ارفع مستنداتك في الجانب الأيسر، ثم اختبر ردود البوت هنا. الملفات
-                  النصية تُحقن تلقائياً كسياق مرجعي.
+                  ارفع مستنداتك في الجانب الأيسر، ثم اختبر ردود البوت هنا. الملفات النصية تُحقن
+                  تلقائياً كسياق مرجعي.
                 </p>
               </div>
             </div>
@@ -300,10 +293,7 @@ function KnowledgePage() {
           <div ref={endRef} />
         </div>
 
-        <form
-          onSubmit={handleSend}
-          className="flex items-end gap-2 border-t border-black/5 p-3"
-        >
+        <form onSubmit={handleSend} className="flex items-end gap-2 border-t border-black/5 p-3">
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -411,8 +401,8 @@ function KnowledgePage() {
         </div>
 
         <div className="mt-3 rounded-lg bg-[#030957]/5 p-2 text-[10px] leading-relaxed text-[#030957]">
-          <strong>ملاحظة:</strong> يُحقن محتوى الملفات النصية تلقائياً كسياق مرجعي في
-          الـ System Prompt عند تفعيل خيار «استخدام قاعدة المعرفة».
+          <strong>ملاحظة:</strong> يُحقن محتوى الملفات النصية تلقائياً كسياق مرجعي في الـ System
+          Prompt عند تفعيل خيار «استخدام قاعدة المعرفة».
         </div>
       </aside>
     </div>

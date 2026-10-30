@@ -79,7 +79,10 @@
     if (event.origin !== origin) return;
     var data = event.data;
     if (!data || data.source !== "azabot") return;
-    if (data.type === "layout" && (data.state === "collapsed" || data.state === "expanded" || data.state === "open")) {
+    if (
+      data.type === "layout" &&
+      (data.state === "collapsed" || data.state === "expanded" || data.state === "open")
+    ) {
       widgetState = data.state;
     } else if (data.type === "open") widgetState = "open";
     else if (data.type === "close") widgetState = "collapsed";

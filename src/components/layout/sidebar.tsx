@@ -21,7 +21,12 @@ interface SidebarProps {
 
 export function Sidebar({ title, subtitle, items, footer, className }: SidebarProps) {
   return (
-    <aside className={cn("flex h-full w-72 shrink-0 flex-col border-l border-border bg-background", className)}>
+    <aside
+      className={cn(
+        "flex h-full w-72 shrink-0 flex-col border-l border-border bg-background",
+        className,
+      )}
+    >
       <div className="border-b border-border px-5 py-4">
         <div className="flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#030957] text-sm font-bold text-white">
