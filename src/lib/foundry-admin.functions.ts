@@ -66,7 +66,7 @@ export const discoverFoundryAgents = createServerFn({ method: "GET" })
       });
       if (!response.ok) throw new Error("فشل اكتشاف وكلاء Foundry (HTTP " + response.status + "). تحقق من صلاحيات الاعتماد.");
       const result = await response.json() as {
-        data?: Array<{ id?: string; name?: string; description?: string; version?: string | number; latest_version?: string | number }>;
+        data?: Array<{ id?: string; name?: string; description?: string; version?: string | number; latest_version?: string | number; versions?: { latest?: { version?: string | number; description?: string } } }>;
         has_more?: boolean;
         last_id?: string;
       };
@@ -76,7 +76,7 @@ export const discoverFoundryAgents = createServerFn({ method: "GET" })
         records.push({
           name: item.name,
           description: item.description || "",
-          version: item.latest_version != null ? String(item.latest_version) : item.version != null ? String(item.version) : null,
+          version: item.versions?.latest?.version != null ? String(item.versions.latest.version) : item.latest_version != null ? String(item.latest_version) : item.version != null ? String(item.version) : null,
         });
       }
       if (!result.has_more || !result.last_id || result.last_id === after) break;
