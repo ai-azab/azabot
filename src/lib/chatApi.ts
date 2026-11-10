@@ -2,6 +2,7 @@ import type { ChatApiRequestMeta, ChatApiResponse, ChatFile } from "@/types/chat
 import { supabase } from "@/integrations/supabase/client";
 import { getChatUploadSignedUrl } from "@/lib/chatUploads.functions";
 import { dispatchMessageToAgent } from "@/lib/agents/dispatcher.functions";
+import { foundryChat } from "@/lib/foundry.functions";
 
 const BUCKET = "chatbot-uploads";
 
@@ -65,6 +66,20 @@ export async function sendChatMessage({
   }
 
   const threadId = conversationId && conversationId.includes(".") ? conversationId : null;
+
+  // Database-backed Foundry agents use their UUID and the agent_reference API.
+  // Legacy registry agents retain the existing dispatcher path.
+  if (agentId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(agentId)) {
+    const result = await foundryChat({
+      data: {
+        agentId,
+        threadId,
+        message,
+        attachments: attachments.map((a) => ({ url: a.url, name: a.name, type: a.type })),
+      },
+    });
+    return { reply: result.reply, conversationId: result.threadId, sources: [], actions: [] };
+  }
 
   if (agentId) {
     const attachmentLines = attachments.map(
