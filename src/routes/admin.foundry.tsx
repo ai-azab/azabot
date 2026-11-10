@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { CheckCircle2, XCircle, ExternalLink, ShieldCheck } from "lucide-react";
-import { getFoundrySettingsStatus } from "@/lib/foundry-admin.functions";
+import { getFoundrySettingsStatus, discoverFoundryAgents } from "@/lib/foundry-admin.functions";
+import { listAgents, saveAgent } from "@/lib/agents.functions";
 import { AgentsPage } from "./admin.agents";
 
 export const Route = createFileRoute("/admin/foundry")({
@@ -11,10 +13,53 @@ export const Route = createFileRoute("/admin/foundry")({
 
 function FoundrySettingsPage() {
   const loadStatus = useServerFn(getFoundrySettingsStatus);
+  const loadRemote = useServerFn(discoverFoundryAgents);
+  const loadExisting = useServerFn(listAgents);
+  const save = useServerFn(saveAgent);
+  const qc = useQueryClient();
+  const [discover, setDiscover] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [message, setMessage] = useState("");
   const status = useQuery({
     queryKey: ["admin", "foundry", "status"],
     queryFn: () => loadStatus(),
   });
+  const remote = useQuery({
+    queryKey: ["admin", "foundry", "discovered"],
+    queryFn: () => loadRemote(),
+    enabled: discover,
+    retry: false,
+  });
+
+  const importAll = async () => {
+    if (!remote.data || importing) return;
+    setImporting(true);
+    setMessage("");
+    let added = 0;
+    let skipped = 0;
+    try {
+      const existing = await loadExisting();
+      const names = new Set(existing.filter((a) => a.provider === "foundry").map((a) => a.agent_name));
+      for (const agent of remote.data) {
+        if (!agent.version || names.has(agent.name)) { skipped++; continue; }
+        await save({ data: {
+          name: agent.name, description: agent.description, provider: "foundry",
+          agent_name: agent.name, agent_version: agent.version, deployment: null,
+          system_prompt: "", temperature: 0.7, max_tokens: 800,
+          is_default: false, is_active: true, sort_order: 100 + added,
+        } });
+        names.add(agent.name);
+        added++;
+      }
+      await qc.invalidateQueries({ queryKey: ["admin", "agents"] });
+      setMessage(`تم ربط ${added} وكيل. تم تخطي ${skipped} (مسجل مسبقاً أو بلا إصدار محدد).`);
+    } catch (error) {
+      setMessage(`تم ربط ${added} وكيل قبل توقف الاستيراد: ${(error as Error).message}`);
+    } finally {
+      setImporting(false);
+    }
+  };
+
   const checks = [
     { label: "FOUNDRY_PROJECT_ENDPOINT", ok: status.data?.endpointConfigured },
     { label: "FOUNDRY_API_KEY", ok: status.data?.credentialConfigured },
@@ -68,6 +113,41 @@ function FoundrySettingsPage() {
           </a>
           <Link to="/admin/integration" className="underline">إعدادات Azure OpenAI السابقة</Link>
         </div>
+      </section>
+      <section className="rounded-2xl border border-black/5 bg-white p-5 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="font-bold">اكتشاف الوكلاء من مشروع Foundry</h2>
+            <p className="mt-1 text-xs text-muted-foreground">قراءة مباشرة من API دون تعديل الوكلاء على Azure.</p>
+          </div>
+          <button type="button" onClick={() => { setDiscover(true); void remote.refetch(); }}
+            disabled={remote.isFetching}
+            className="rounded-lg border border-black/10 px-4 py-2 text-sm disabled:opacity-50">
+            {remote.isFetching ? "جارٍ الاتصال..." : "اكتشاف الوكلاء"}
+          </button>
+        </div>
+        {remote.error && <p role="alert" className="mt-3 text-sm text-red-600">{(remote.error as Error).message}</p>}
+        {remote.data && (
+          <div className="mt-4 space-y-3">
+            <p className="text-sm">الوكلاء المكتشفون: {remote.data.length}</p>
+            <div className="max-h-72 space-y-2 overflow-auto">
+              {remote.data.map((agent) => (
+                <div key={agent.name} className="flex justify-between gap-3 rounded-lg bg-[#f4f5fb] p-3 text-sm">
+                  <span>{agent.name}</span>
+                  <span dir="ltr" className="text-xs text-muted-foreground">
+                    {agent.version ? "v" + agent.version : "يلزم تحديد الإصدار"}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <button type="button" disabled={importing || !remote.data.some((a) => a.version)}
+              onClick={importAll}
+              className="rounded-lg bg-[#030957] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
+              {importing ? "جارٍ الربط..." : "ربط الوكلاء المكتشفين"}
+            </button>
+          </div>
+        )}
+        {message && <p role="status" className="mt-3 text-sm">{message}</p>}
       </section>
       <AgentsPage />
     </div>
