@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { CheckCircle2, XCircle, ExternalLink, ShieldCheck } from "lucide-react";
-import { getFoundrySettingsStatus, discoverFoundryAgents } from "@/lib/foundry-admin.functions";
+import { getFoundrySettingsStatus, discoverFoundryAgents, testFoundryAgent } from "@/lib/foundry-admin.functions";
 import { listAgents, saveAgent } from "@/lib/agents.functions";
 import { AgentsPage } from "./admin.agents";
 
@@ -15,6 +15,9 @@ function FoundrySettingsPage() {
   const loadStatus = useServerFn(getFoundrySettingsStatus);
   const loadRemote = useServerFn(discoverFoundryAgents);
   const loadExisting = useServerFn(listAgents);
+  const testAgent = useServerFn(testFoundryAgent);
+  const [tests, setTests] = useState<Record<string, string>>({});
+  const [testing, setTesting] = useState<string | null>(null);
   const save = useServerFn(saveAgent);
   const qc = useQueryClient();
   const [discover, setDiscover] = useState(false);
@@ -31,6 +34,19 @@ function FoundrySettingsPage() {
     retry: false,
   });
 
+  const testOne = async (name: string) => {
+    if (testing) return;
+    setTesting(name);
+    setTests((state) => ({ ...state, [name]: "جارٍ الاختبار..." }));
+    try {
+      const r = await testAgent({ data: { name } });
+      setTests((state) => ({ ...state, [name]: `ناجح — ${r.latencyMs}ms — ${r.reply}` }));
+    } catch (error) {
+      setTests((state) => ({ ...state, [name]: `فشل — ${(error as Error).message}` }));
+    } finally {
+      setTesting(null);
+    }
+  };
   const importAll = async () => {
     if (!remote.data || importing) return;
     setImporting(true);
@@ -130,13 +146,21 @@ function FoundrySettingsPage() {
         {remote.data && (
           <div className="mt-4 space-y-3">
             <p className="text-sm">الوكلاء المكتشفون: {remote.data.length}</p>
-            <div className="max-h-72 space-y-2 overflow-auto">
+            <div className="max-h-96 space-y-2 overflow-auto">
               {remote.data.map((agent) => (
-                <div key={agent.name} className="flex justify-between gap-3 rounded-lg bg-[#f4f5fb] p-3 text-sm">
-                  <span>{agent.name}</span>
-                  <span dir="ltr" className="text-xs text-muted-foreground">
-                    {agent.version ? "v" + agent.version : "يلزم تحديد الإصدار"}
-                  </span>
+                <div key={agent.name} className="rounded-lg bg-[#f4f5fb] p-3 text-sm">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <span>{agent.name}</span>
+                    <span dir="ltr" className="text-xs text-muted-foreground">
+                      {agent.version ? "v" + agent.version : "يلزم تحديد الإصدار"}
+                    </span>
+                    <button type="button" disabled={Boolean(testing)}
+                      onClick={() => void testOne(agent.name)}
+                      className="rounded-md border border-slate-200 bg-white px-3 py-1 text-xs disabled:opacity-50">
+                      اختبار التشغيل
+                    </button>
+                  </div>
+                  {tests[agent.name] && <p role="status" className="mt-2 text-xs">{tests[agent.name]}</p>}
                 </div>
               ))}
             </div>
