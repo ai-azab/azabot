@@ -62,7 +62,7 @@ function FoundrySettingsPage() {
 
   const checks = [
     { label: "FOUNDRY_PROJECT_ENDPOINT", ok: status.data?.endpointConfigured },
-    { label: "FOUNDRY_API_KEY", ok: status.data?.credentialConfigured },
+    { label: "Microsoft Entra ID (Foundry)", ok: status.data?.credentialConfigured },
     { label: "FOUNDRY_MODEL", ok: status.data?.modelConfigured },
   ];
 
