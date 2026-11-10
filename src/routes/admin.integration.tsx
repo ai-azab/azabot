@@ -138,8 +138,7 @@ function IntegrationPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold">إعدادات الدمج مع Azure OpenAI</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          أدخل بيانات الاعتماد الخاصة بمشروعك في Azure OpenAI Service. يتم حفظ الإعدادات محلياً في
-          المتصفح ولا تُرسل إلا إلى نقطة الـ Endpoint التي حددتها.
+          أدخل بيانات الاعتماد الخاصة بمشروعك في Azure OpenAI Service. لا يتم حفظ المفتاح في المتصفح. الاختبار يتم من الخادم باستخدام القيم المدخلة لهذه الجلسة فقط.
         </p>
       </div>
 
