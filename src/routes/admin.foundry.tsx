@@ -52,25 +52,32 @@ function FoundrySettingsPage() {
     setImporting(true);
     setMessage("");
     let added = 0;
+    let updated = 0;
     let skipped = 0;
     try {
       const existing = await loadExisting();
-      const names = new Set(existing.filter((a) => a.provider === "foundry").map((a) => a.agent_name));
+      const byName = new Map(existing.filter((a) => a.provider === "foundry").map((a) => [a.agent_name, a]));
       for (const agent of remote.data) {
-        if (!agent.version || names.has(agent.name)) { skipped++; continue; }
+        if (!agent.version) { skipped++; continue; }
+        const previous = byName.get(agent.name);
+        if (previous) {
+          if (previous.agent_version === agent.version) { skipped++; continue; }
+          await save({ data: { ...previous, agent_version: agent.version } });
+          updated++;
+          continue;
+        }
         await save({ data: {
           name: agent.name, description: agent.description, provider: "foundry",
           agent_name: agent.name, agent_version: agent.version, deployment: null,
           system_prompt: "", temperature: 0.7, max_tokens: 800,
           is_default: false, is_active: true, sort_order: 100 + added,
         } });
-        names.add(agent.name);
         added++;
       }
       await qc.invalidateQueries({ queryKey: ["admin", "agents"] });
-      setMessage(`تم ربط ${added} وكيل. تم تخطي ${skipped} (مسجل مسبقاً أو بلا إصدار محدد).`);
+      setMessage(`تم إضافة ${added} وكيل وتحديث إصدار ${updated} وكيل، وتخطي ${skipped}.`);
     } catch (error) {
-      setMessage(`تم ربط ${added} وكيل قبل توقف الاستيراد: ${(error as Error).message}`);
+      setMessage(`تمت إضافة ${added} وتحديث ${updated} قبل توقف المزامنة: ${(error as Error).message}`);
     } finally {
       setImporting(false);
     }
@@ -167,7 +174,7 @@ function FoundrySettingsPage() {
             <button type="button" disabled={importing || !remote.data.some((a) => a.version)}
               onClick={importAll}
               className="rounded-lg bg-[#030957] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
-              {importing ? "جارٍ الربط..." : "ربط الوكلاء المكتشفين"}
+              {importing ? "جارٍ الربط..." : "مزامنة الوكلاء والإصدارات المكتشفة"}
             </button>
           </div>
         )}
