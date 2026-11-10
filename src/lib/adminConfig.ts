@@ -28,7 +28,10 @@ export function loadAzureConfig(): AzureOpenAIConfig {
   try {
     const raw = window.localStorage.getItem(LS_KEY);
     if (!raw) return DEFAULT_AZURE_CONFIG;
-    return { ...DEFAULT_AZURE_CONFIG, ...JSON.parse(raw) };
+    const stored = JSON.parse(raw) as Partial<AzureOpenAIConfig>;
+    // Discard old plaintext API credentials persisted by previous releases.
+    window.localStorage.removeItem(LS_KEY);
+    return { ...DEFAULT_AZURE_CONFIG, ...stored, apiKey: "" };
   } catch {
     return DEFAULT_AZURE_CONFIG;
   }
@@ -36,7 +39,10 @@ export function loadAzureConfig(): AzureOpenAIConfig {
 
 export function saveAzureConfig(cfg: AzureOpenAIConfig) {
   if (typeof window === "undefined") return;
-  window.localStorage.setItem(LS_KEY, JSON.stringify(cfg));
+  // Never persist Azure API credentials or integration parameters in browser storage.
+  // The connection remains usable for an in-session administrator test only.
+  window.localStorage.removeItem(LS_KEY);
+  void cfg;
 }
 
 export interface TrainingExample {
