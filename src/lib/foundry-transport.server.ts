@@ -3,7 +3,7 @@ const API_SCOPE = "https://ai.azure.com/.default";
 let cache: { token: string; until: number } | null = null;
 
 export function foundryBase(): string {
-  const raw = process.env.FOUNDRY_PROJECT_ENDPOINT;
+  const raw = process.env.FOUNDRY_PROJECT_ENDPOINT || process.env.AZURE_AI_FOUNDRY_ENDPOINT;
   if (!raw) throw new Error("FOUNDRY_PROJECT_ENDPOINT is missing");
   const url = new URL(raw);
   if (
