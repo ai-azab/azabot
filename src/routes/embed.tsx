@@ -51,7 +51,7 @@ function EmbedPage() {
     if (target && window.parent !== window) window.parent.postMessage({ source: "azabot", type: open ? "open" : "close" }, target);
   };
 
-  const notifyState = (state: "collapsed" | "expanded" | "open") => {
+  const notifyState = (state: "collapsed" | "expanded" | "open" | "agents") => {
     const target = trustedParentOrigin();
     if (target && window.parent !== window) window.parent.postMessage({ source: "azabot", type: "layout", state }, target);
   };
