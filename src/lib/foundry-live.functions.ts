@@ -10,14 +10,28 @@ type RequestData = {
   attachments?: Array<{ url: string; name: string; type: string }>;
 };
 
-const chatSchema = z.object({
-  agentId: z.string().regex(UUID),
-  threadId: z.string().max(512).nullable().optional(),
-  message: z.string().trim().max(8000),
-  attachments: z.array(z.object({
-    url: z.string().url().max(4096), name: z.string().max(255), type: z.string().max(128),
-  })).max(10).default([]),
-}).refine((data) => data.message.length > 0 || data.attachments.length > 0);
+function getSecret() {
+  const secret = process.env.THREAD_SIGNING_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!secret) throw new Error("Server thread signing secret is missing");
+  return secret;
+}
+
+function sign(id: string, agentId: string, userId: string) {
+  const signature = createHmac("sha256", getSecret()).update(userId + ":" + agentId + ":" + id).digest("hex");
+  return id + "." + signature;
+}
+
+function verify(value: string | null | undefined, agentId: string, userId: string): string | null {
+  if (!value || value.length > 512) return null;
+  const i = value.lastIndexOf(".");
+  if (i <= 0) return null;
+  const id = value.slice(0, i);
+  const got = value.slice(i + 1);
+  if (!/^[0-9a-f]{64}$/i.test(got)) return null;
+  const expected = createHmac("sha256", getSecret()).update(userId + ":" + agentId + ":" + id).digest();
+  const received = Buffer.from(got, "hex");
+  return timingSafeEqual(expected, received) ? id : null;
+}
 
 export const foundryAgentChat = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -33,10 +47,10 @@ export const foundryAgentChat = createServerFn({ method: "POST" })
     if (error || !agent?.agent_name) throw new Error("Selected agent is not available");
 
     // Each signed conversation is tied to its selected agent UUID.
-    let conversation = verifyConversation(data.threadId, agent.id, context.userId);
+    let conversation = verify(data.threadId, agent.id, context.userId);
     if (!conversation) {
-      const fresh = await foundryRequest<{ id: string }>("/openai/v1/conversations", {
-        method: "POST", body: JSON.stringify({}),
+      const fresh = await foundryRequest<{ id: string }>("/agents/" + encodeURIComponent(agent.agent_name) + "/endpoint/protocols/openai/conversations?api-version=v1", {
+        method: "POST", body: JSON.stringify({ items: [] }),
       });
       if (!fresh.id) throw new Error("Foundry conversation creation failed");
       conversation = fresh.id;
@@ -72,6 +86,6 @@ export const foundryAgentChat = createServerFn({ method: "POST" })
         .map((c) => typeof c.text === "string" ? c.text : c.text?.value || "")
         .filter(Boolean).join("\n").trim();
     if (!reply) throw new Error("Selected agent produced no answer");
-    return { reply, threadId: signConversation(conversation, agent.id, context.userId),
+    return { reply, threadId: sign(conversation, agent.id, context.userId),
       agent: { id: agent.id, name: agent.agent_name, version: agent.agent_version } };
   });

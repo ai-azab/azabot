@@ -112,16 +112,13 @@ export function AgentPickerPopover({ selectedAgentId, onSelectAgent, onOpenChang
       {open && (
         <div
           role="menu"
-          className="absolute bottom-[calc(100%+10px)] left-0 z-[10020] w-[min(280px,calc(100vw-3rem))] rounded-lg border border-azab-line bg-azab-surface p-2 shadow-azab-launcher"
+          className="absolute bottom-[calc(100%+10px)] left-1/2 z-[10020] w-[min(320px,calc(100vw-2rem))] -translate-x-1/2 overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_18px_45px_rgba(15,23,42,0.16)] sm:left-auto sm:right-0 sm:translate-x-0"
         >
           <p className="px-2 pb-2 pt-1 text-right text-[11px] font-medium text-muted-foreground">
             الوكلاء المتاحون
           </p>
 
-          <div className="max-h-[min(340px,calc(100dvh-180px))] space-y-1 overflow-y-auto overscroll-contain">
-            {loading && <p role="status" className="p-2 text-xs text-muted-foreground">جارٍ تحميل الوكلاء…</p>}
-            {error && <p role="alert" className="p-2 text-xs text-destructive">تعذر تحميل الوكلاء؛ أعد فتح الصفحة للمحاولة.</p>}
-            {!loading && !error && agents.length === 0 && <p className="p-2 text-xs text-muted-foreground">لا يوجد وكلاء مفعّلون حاليًا.</p>}
+          <div className="max-h-[min(420px,60dvh)] space-y-1 overflow-y-auto overscroll-contain">
             {agents.map((agent) => {
               const Icon = iconBySlug[agent.slug as keyof typeof iconBySlug] ?? Bot;
               const active = agent.id === selected?.id;

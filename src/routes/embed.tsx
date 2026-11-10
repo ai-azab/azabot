@@ -23,6 +23,16 @@ export const Route = createFileRoute("/embed")({
   }),
 });
 
+function trustedParentOrigin(): string | null {
+  try {
+    if (!document.referrer) return null;
+    const parent = new URL(document.referrer);
+    const allowed = parent.protocol === "https:" &&
+      (parent.hostname === "alazab.com" || parent.hostname.endsWith(".alazab.com"));
+    return allowed ? parent.origin : null;
+  } catch { return null; }
+}
+
 function EmbedPage() {
   const [mounted, setMounted] = useState(false);
 
@@ -32,15 +42,18 @@ function EmbedPage() {
     document.documentElement.style.background = "transparent";
     document.body.style.background = "transparent";
     document.body.style.overflow = "hidden";
-    window.parent?.postMessage({ source: "azabot", type: "ready" }, "*");
+    const target = trustedParentOrigin();
+    if (target && window.parent !== window) window.parent.postMessage({ source: "azabot", type: "ready" }, target);
   }, []);
 
   const notify = (open: boolean) => {
-    window.parent?.postMessage({ source: "azabot", type: open ? "open" : "close" }, "*");
+    const target = trustedParentOrigin();
+    if (target && window.parent !== window) window.parent.postMessage({ source: "azabot", type: open ? "open" : "close" }, target);
   };
 
-  const notifyState = (state: "collapsed" | "expanded" | "agents" | "open") => {
-    window.parent?.postMessage({ source: "azabot", type: "layout", state }, "*");
+  const notifyState = (state: "collapsed" | "expanded" | "open") => {
+    const target = trustedParentOrigin();
+    if (target && window.parent !== window) window.parent.postMessage({ source: "azabot", type: "layout", state }, target);
   };
 
   if (!mounted) return null;
