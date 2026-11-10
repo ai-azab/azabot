@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { ChatMessage, ChatSettingsState } from "@/types/chat";
 import { supabase } from "@/integrations/supabase/client";
+import { listPublicAgents } from "@/lib/agents/dispatcher.functions";
 
 const LS_MESSAGES = "azab.chat.messages";
 const LS_SETTINGS = "azab.chat.settings";
@@ -59,7 +60,15 @@ export function useChatSession({ applyTheme = true, ensureSession = false }: Opt
       window.localStorage.setItem(LS_CONV_ID, id);
     }
     setConversationId(id);
-    setSelectedAgentId(window.localStorage.getItem(LS_AGENT_ID) || DEFAULT_AGENT_ID);
+    const storedAgent = window.localStorage.getItem(LS_AGENT_ID) || DEFAULT_AGENT_ID;
+    setSelectedAgentId(storedAgent);
+    void listPublicAgents().then((agents) => {
+      if (agents.length && !agents.some((agent) => agent.id === storedAgent)) {
+        setSelectedAgentId((current) => current === storedAgent
+          ? (agents.find((agent) => agent.isDefault) ?? agents[0]).id
+          : current);
+      }
+    }).catch(() => { /* Preserve the previous selection if discovery fails. */ });
     setHydrated(true);
   }, []);
 
