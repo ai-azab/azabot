@@ -61,7 +61,13 @@ export function ChatbotWidget({
         isOpen={open}
         isExpanded={launcherExpanded}
         selectedAgentId={selectedAgentId}
-        onSelectAgent={(agent) => setSelectedAgentId(agent.id)}
+        onSelectAgent={(agent) => {
+          if (agent.id !== selectedAgentId) {
+            setSelectedAgentId(agent.id);
+            setConversationId("");
+            setMessages([]);
+          }
+        }}
         onExpand={() => setLauncherState(true)}
         onCollapse={() => setLauncherState(false)}
         onOpenChat={() => setOpenState(true)}
