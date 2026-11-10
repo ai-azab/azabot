@@ -44,7 +44,7 @@ export const discoverFoundryAgents = createServerFn({ method: "GET" })
       } = await foundryRequest<{
         data: Array<{ name: string; description?: string; state?: string; versions?: { latest?: { version?: string | number } } }>;
         has_more?: boolean; last_id?: string;
-      }>("/agents?api-version=v1&limit=100" + cursor);
+      } = await foundryRequest("/agents?api-version=v1&limit=100" + cursor);
       for (const a of response.data || []) {
         if (!a.name || seen.has(a.name)) continue;
         seen.add(a.name);

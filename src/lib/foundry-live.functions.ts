@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { signConversation, verifyConversation } from "@/lib/threadTokens.server";
+import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { foundryRequest } from "@/lib/foundry-transport.server";
 
@@ -35,10 +36,7 @@ function verify(value: string | null | undefined, agentId: string, userId: strin
 export const foundryAgentChat = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: RequestData) => {
-    if (!UUID.test(data?.agentId || "") || typeof data.message !== "string" ||
-      !data.message.trim() || data.message.length > 8000) throw new Error("Invalid chat input");
-    return { ...data, message: data.message.trim(),
-      attachments: (data.attachments || []).slice(0, 10) };
+    return chatSchema.parse(data);
   })
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -64,9 +62,11 @@ export const foundryAgentChat = createServerFn({ method: "POST" })
       try {
         const url = new URL(attachment.url);
         if (url.protocol !== "https:" || !permitted || url.host !== permitted ||
-            !url.pathname.startsWith("/storage/v1/object/sign/chatbot-uploads/")) continue;
+            !decodeURIComponent(url.pathname).startsWith(`/storage/v1/object/sign/chatbot-uploads/${context.userId}/`)) continue;
         if (attachment.type.startsWith("image/")) {
           content.push({ type: "input_image", image_url: url.toString() });
+        } else {
+          content.push({ type: "input_text", text: `المرفق: ${attachment.name}\n${url.toString()}` });
         }
       } catch { /* ignore invalid URL */ }
     }

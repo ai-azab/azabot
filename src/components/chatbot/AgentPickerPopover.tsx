@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { listPublicAgents } from "@/lib/agents/dispatcher.functions";
 
 export interface AgentItem {
@@ -26,6 +27,7 @@ export interface AgentItem {
 interface AgentPickerPopoverProps {
   selectedAgentId?: string;
   onSelectAgent?: (agent: AgentItem) => void;
+  onOpenChange?: (open: boolean) => void;
 }
 
 const iconBySlug = {
@@ -38,8 +40,10 @@ const iconBySlug = {
   prod: Package,
 } as const;
 
-export function AgentPickerPopover({ selectedAgentId, onSelectAgent }: AgentPickerPopoverProps) {
+export function AgentPickerPopover({ selectedAgentId, onSelectAgent, onOpenChange }: AgentPickerPopoverProps) {
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [agents, setAgents] = useState<AgentItem[]>([]);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -51,13 +55,15 @@ export function AgentPickerPopover({ selectedAgentId, onSelectAgent }: AgentPick
         if (active) setAgents(items);
       })
       .catch(() => {
-        if (active) setAgents([]);
-      });
+        if (active) setError(true);
+      }).finally(() => { if (active) setLoading(false); });
 
     return () => {
       active = false;
     };
   }, []);
+
+  useEffect(() => { onOpenChange?.(open); }, [open, onOpenChange]);
 
   useEffect(() => {
     const onPointerDown = (event: MouseEvent) => {
@@ -67,7 +73,12 @@ export function AgentPickerPopover({ selectedAgentId, onSelectAgent }: AgentPick
     };
 
     document.addEventListener("mousedown", onPointerDown);
-    return () => document.removeEventListener("mousedown", onPointerDown);
+    const onEscape = (event: KeyboardEvent) => { if (event.key === "Escape") setOpen(false); };
+    document.addEventListener("keydown", onEscape);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onEscape);
+    };
   }, []);
 
   const selected = useMemo(
@@ -84,7 +95,9 @@ export function AgentPickerPopover({ selectedAgentId, onSelectAgent }: AgentPick
 
   return (
     <div ref={rootRef} className="relative min-w-0">
-      <button
+      <Button
+        variant="ghost"
+        size="icon"
         type="button"
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
@@ -94,14 +107,14 @@ export function AgentPickerPopover({ selectedAgentId, onSelectAgent }: AgentPick
         className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-azab-amber text-azab-navy transition hover:brightness-95"
       >
         <SelectedIcon className="h-4 w-4" />
-      </button>
+      </Button>
 
       {open && (
         <div
           role="menu"
           className="absolute bottom-[calc(100%+10px)] left-1/2 z-[10020] w-[min(320px,calc(100vw-2rem))] -translate-x-1/2 overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_18px_45px_rgba(15,23,42,0.16)] sm:left-auto sm:right-0 sm:translate-x-0"
         >
-          <p className="px-2 pb-2 pt-1 text-right text-[11px] font-medium text-slate-500">
+          <p className="px-2 pb-2 pt-1 text-right text-[11px] font-medium text-muted-foreground">
             الوكلاء المتاحون
           </p>
 
@@ -111,7 +124,8 @@ export function AgentPickerPopover({ selectedAgentId, onSelectAgent }: AgentPick
               const active = agent.id === selected?.id;
 
               return (
-                <button
+                <Button
+                  variant="ghost"
                   key={agent.id}
                   type="button"
                   role="menuitem"
@@ -120,27 +134,27 @@ export function AgentPickerPopover({ selectedAgentId, onSelectAgent }: AgentPick
                     setOpen(false);
                   }}
                   className={cn(
-                    "flex w-full items-center gap-2 rounded-xl px-2 py-2 text-right transition",
-                    active ? "bg-[#f3f6ff]" : "hover:bg-slate-50",
+                    "flex h-auto w-full items-center gap-2 rounded-md px-2 py-2 text-right transition",
+                    active ? "bg-azab-soft" : "hover:bg-azab-soft",
                   )}
                 >
-                  <span className="flex h-4 w-4 shrink-0 items-center justify-center text-[#4f6ef7]">
+                  <span className="flex h-4 w-4 shrink-0 items-center justify-center text-primary">
                     {active ? <Check className="h-4 w-4" /> : null}
                   </span>
 
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-xs font-semibold text-slate-800">
+                    <span className="block truncate text-xs font-semibold text-foreground">
                       {agent.name}
                     </span>
-                    <span className="block truncate text-[10px] text-slate-500">
+                    <span className="block truncate text-[10px] text-muted-foreground">
                       {agent.description}
                     </span>
                   </span>
 
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#eef2ff] text-[#465bc7]">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-azab-soft text-primary">
                     <Icon className="h-3.5 w-3.5" />
                   </span>
-                </button>
+                </Button>
               );
             })}
           </div>

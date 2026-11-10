@@ -9,7 +9,7 @@ export function ChatbotWidget({
 }: {
   /** Notified whenever the chat window is opened or closed (used by the embed page). */
   onOpenChange?: (open: boolean) => void;
-  onStateChange?: (state: "collapsed" | "expanded" | "open") => void;
+  onStateChange?: (state: "collapsed" | "expanded" | "agents" | "open") => void;
 } = {}) {
   const [open, setOpen] = useState(false);
   const [launcherExpanded, setLauncherExpanded] = useState(false);
@@ -54,6 +54,8 @@ export function ChatbotWidget({
   return (
     <>
       <ChatWindow
+        key={selectedAgentId}
+        sessionUnavailable={sessionState !== "ready"}
         open={open}
         messages={messages}
         setMessages={setMessages}
@@ -66,6 +68,7 @@ export function ChatbotWidget({
         onClose={() => setOpenState(false)}
       />
       <ChatButton
+        onPickerChange={(visible) => onStateChange?.(visible ? "agents" : "expanded")}
         isOpen={open}
         isExpanded={launcherExpanded}
         selectedAgentId={selectedAgentId}
