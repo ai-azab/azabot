@@ -1,87 +1,87 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { foundryBase, foundryCredentialsPresent, foundryRequest } from "@/lib/foundry-transport.server";
 
-/** Return setup health without ever disclosing the Foundry API key. */
+async function assertAdmin(context: { supabase: { rpc: (name: string, args: Record<string, string>) => PromiseLike<{ data: unknown; error: unknown }> }; userId: string }) {
+  const { data, error } = await context.supabase.rpc("has_role", {
+    _user_id: context.userId, _role: "admin",
+  });
+  if (error || data !== true) throw new Error("غير مصرح لك بإدارة Foundry");
+}
+
 export const getFoundrySettingsStatus = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data, error } = await context.supabase.rpc("has_role", {
-      _user_id: context.userId,
-      _role: "admin",
-    });
-    if (error || !data) throw new Error("غير مصرح لك بعرض إعدادات Foundry");
-
-    const endpoint = process.env.FOUNDRY_PROJECT_ENDPOINT || "";
+    await assertAdmin(context);
     let endpointHost = "";
-    try {
-      if (endpoint) endpointHost = new URL(endpoint).host;
-    } catch {
-      // Invalid endpoint is reported as unconfigured.
-    }
+    try { endpointHost = new URL(foundryBase()).host; } catch { /* not configured */ }
     return {
       endpointConfigured: Boolean(endpointHost),
       endpointHost,
-      credentialConfigured: Boolean(process.env.FOUNDRY_API_KEY),
+      credentialConfigured: foundryCredentialsPresent(),
       modelConfigured: Boolean(process.env.FOUNDRY_MODEL),
     };
   });
 
 export interface DiscoveredFoundryAgent {
-  name: string;
-  description: string;
-  version: string | null;
+  name: string; description: string; version: string | null;
+  status: string;
 }
 
-/** Read-only remote discovery; no changes to Foundry or Supabase. */
 export const discoverFoundryAgents = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<DiscoveredFoundryAgent[]> => {
-    const { data: admin, error } = await context.supabase.rpc("has_role", {
-      _user_id: context.userId,
-      _role: "admin",
-    });
-    if (error || !admin) throw new Error("غير مصرح لك بعرض وكلاء Foundry");
-    const endpoint = process.env.FOUNDRY_PROJECT_ENDPOINT;
-    const token = process.env.FOUNDRY_ACCESS_TOKEN || process.env.FOUNDRY_API_KEY;
-    if (!endpoint || !token) throw new Error("يلزم إعداد بيانات اتصال Foundry على الخادم");
-    const root = new URL(endpoint);
-    if (root.protocol !== "https:" || !root.hostname.endsWith(".services.ai.azure.com")) {
-      throw new Error("عنوان مشروع Foundry غير صالح");
-    }
-    const records: DiscoveredFoundryAgent[] = [];
+    await assertAdmin(context);
+    const agents: DiscoveredFoundryAgent[] = [];
     const seen = new Set<string>();
     let after: string | null = null;
     for (let page = 0; page < 20; page++) {
-      const url = new URL(root.toString().replace(/\/+$/, "") + "/agents");
-      url.searchParams.set("api-version", "v1");
-      url.searchParams.set("limit", "100");
-      if (after) url.searchParams.set("after", after);
-      const response = await fetch(url.toString(), {
-        headers: {
-          Authorization: "Bearer " + token,
-          ...(process.env.FOUNDRY_ACCESS_TOKEN ? {} : { "api-key": token }),
-          Accept: "application/json",
-        },
-        signal: AbortSignal.timeout(15000),
-      });
-      if (!response.ok) throw new Error("فشل اكتشاف وكلاء Foundry (HTTP " + response.status + "). تحقق من صلاحيات الاعتماد.");
-      const result = await response.json() as {
-        data?: Array<{ id?: string; name?: string; description?: string; version?: string | number; latest_version?: string | number; versions?: { latest?: { version?: string | number; description?: string } } }>;
-        has_more?: boolean;
-        last_id?: string;
-      };
-      for (const item of Array.isArray(result.data) ? result.data : []) {
-        if (!item.name || seen.has(item.name)) continue;
-        seen.add(item.name);
-        records.push({
-          name: item.name,
-          description: item.description || "",
-          version: item.versions?.latest?.version != null ? String(item.versions.latest.version) : item.latest_version != null ? String(item.latest_version) : item.version != null ? String(item.version) : null,
+      const cursor = after ? "&after=" + encodeURIComponent(after) : "";
+      const response = await foundryRequest<{
+        data: Array<{ name: string; description?: string; state?: string; versions?: { latest?: { version?: string | number } } }>;
+        has_more?: boolean; last_id?: string;
+      }>("/agents?api-version=v1&limit=100" + cursor);
+      for (const a of response.data || []) {
+        if (!a.name || seen.has(a.name)) continue;
+        seen.add(a.name);
+        agents.push({
+          name: a.name,
+          description: a.description || "",
+          version: a.versions?.latest?.version == null ? null : String(a.versions.latest.version),
+          status: a.state || "unknown",
         });
       }
-      if (!result.has_more || !result.last_id || result.last_id === after) break;
-      after = result.last_id;
-      if (page === 19) throw new Error("تجاوز عدد الوكلاء نطاق الفحص الحالي");
+      if (!response.has_more || !response.last_id || response.last_id === after) break;
+      after = response.last_id;
+      if (page === 19) throw new Error("Foundry agent list exceeds inspection limit");
     }
-    return records;
+    return agents;
+  });
+
+/** Real API invocation; HTTP success alone is insufficient. This is a billable request. */
+export const testFoundryAgent = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: { name: string }) => {
+    if (!data || !/^az-agent-[a-z0-9-]{1,50}$/.test(data.name))
+      throw new Error("اسم الوكيل غير صالح");
+    return { name: data.name };
+  })
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const agent = await foundryRequest<{ name: string; state?: string; versions?: { latest?: { version?: string } } }>(
+      "/agents/" + encodeURIComponent(data.name) + "?api-version=v1",
+    );
+    if (agent.name !== data.name || agent.state === "disabled")
+      throw new Error("الوكيل غير موجود أو غير نشط");
+    const started = Date.now();
+    const reply = await foundryRequest<{
+      output_text?: string;
+      output?: Array<{ type?: string; content?: Array<{ text?: string }> }>;
+    }>("/agents/" + encodeURIComponent(data.name) + "/endpoint/protocols/openai/responses?api-version=v1", {
+      method: "POST",
+      body: JSON.stringify({ input: [{ role: "user", content: "رد بكلمة واحدة فقط: جاهز" }] }),
+    });
+    const text = reply.output_text || reply.output?.flatMap(x => x.content || []).map(x => x.text || "").join(" ").trim() || "";
+    if (!text) throw new Error("Foundry returned an empty response");
+    return { ok: true, name: data.name, version: agent.versions?.latest?.version ?? null, latencyMs: Date.now() - started, reply: text.slice(0, 200) };
   });
