@@ -31,6 +31,7 @@ export function ChatbotWidget({
   };
   const {
     hydrated,
+    sessionState,
     messages,
     setMessages,
     settings,
@@ -39,9 +40,16 @@ export function ChatbotWidget({
     setConversationId,
     selectedAgentId,
     setSelectedAgentId,
-  } = useChatSession();
+  } = useChatSession({ ensureSession: true });
 
   if (!hydrated) return null;
+
+  if (sessionState === "unavailable") {
+    return <div dir="rtl" role="alert" className="fixed bottom-4 right-4 z-[9999] max-w-xs rounded-xl border border-red-200 bg-white p-3 text-sm text-red-700 shadow-lg">
+      لا يمكن بدء جلسة الزائر حاليًا. يجب تفعيل Anonymous Sign-ins في Supabase Authentication.
+    </div>;
+  }
+  if (sessionState !== "ready") return null;
 
   return (
     <>
