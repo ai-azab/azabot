@@ -68,8 +68,8 @@ export function useChatSession({ applyTheme = true, ensureSession = false }: Opt
           ? (agents.find((agent) => agent.isDefault) ?? agents[0]).id
           : current);
       }
-    }).catch(() => { /* Preserve the previous selection if discovery fails. */ });
-    setHydrated(true);
+    }).catch(() => { /* Preserve the previous selection if discovery fails. */ })
+      .finally(() => setHydrated(true));
   }, []);
 
   useEffect(() => {
