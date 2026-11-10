@@ -3,7 +3,11 @@ const API_SCOPE = "https://ai.azure.com/.default";
 let cache: { token: string; until: number } | null = null;
 
 export function foundryBase(): string {
-  const raw = process.env.FOUNDRY_PROJECT_ENDPOINT || process.env.AZURE_AI_FOUNDRY_ENDPOINT;
+  const raw =
+    process.env.FOUNDRY_PROJECT_ENDPOINT ||
+    process.env.AZURE_FOUNDRY_PROJECT_ENDPOINT ||
+    process.env.AZURE_EXISTING_AIPROJECT_ENDPOINT ||
+    process.env.AZURE_AI_FOUNDRY_ENDPOINT;
   if (!raw) throw new Error("FOUNDRY_PROJECT_ENDPOINT is missing");
   const url = new URL(raw);
   if (
@@ -12,6 +16,14 @@ export function foundryBase(): string {
     !/^\/api\/projects\/[A-Za-z0-9._-]+\/?$/.test(url.pathname)
   ) throw new Error("Invalid Microsoft Foundry project endpoint");
   return url.toString().replace(/\/+$/, "");
+}
+
+function serverApiKey(): string | null {
+  const key = process.env.FOUNDRY_API_KEY ||
+    process.env.AZURE_FOUNDRY_ACCOUNT_KEY ||
+    process.env.AZURE_FOUNDRY_ACCOUNT_KEY1 ||
+    process.env.AZURE_FOUNDRY_ACCOUNT_KEY2;
+  return key?.trim() || null;
 }
 
 async function accessToken(): Promise<string> {
@@ -56,7 +68,21 @@ export async function foundryRequest<T>(
   const base = foundryBase();
   if (!path.startsWith("/") || path.startsWith("//")) throw new Error("Invalid Foundry path");
   const headers = new Headers(init.headers);
-  headers.set("Authorization", `Bearer ${await accessToken()}`);
+  // Use short-lived Entra tokens when configured; otherwise use the existing
+  // Foundry project API key via the documented api-key header.
+  const hasEntra = Boolean(
+    process.env.FOUNDRY_ACCESS_TOKEN ||
+    (process.env.FOUNDRY_TENANT_ID && process.env.FOUNDRY_CLIENT_ID && process.env.FOUNDRY_CLIENT_SECRET)
+  );
+  if (hasEntra) {
+    headers.set("Authorization", `Bearer ${await accessToken()}`);
+    headers.delete("api-key");
+  } else {
+    const key = serverApiKey();
+    if (!key) throw new Error("Foundry credentials missing: configure FOUNDRY_API_KEY or Microsoft Entra");
+    headers.delete("Authorization");
+    headers.set("api-key", key);
+  }
   headers.set("Accept", "application/json");
   if (init.body) headers.set("Content-Type", "application/json");
   const response = await fetch(base + path, {
@@ -72,6 +98,6 @@ export async function foundryRequest<T>(
 }
 
 export function foundryCredentialsPresent(): boolean {
-  return Boolean(process.env.FOUNDRY_ACCESS_TOKEN ||
+  return Boolean(serverApiKey() || process.env.FOUNDRY_ACCESS_TOKEN ||
     (process.env.FOUNDRY_TENANT_ID && process.env.FOUNDRY_CLIENT_ID && process.env.FOUNDRY_CLIENT_SECRET));
 }

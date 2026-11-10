@@ -20,7 +20,7 @@ export const getFoundrySettingsStatus = createServerFn({ method: "GET" })
       endpointConfigured: Boolean(endpointHost),
       endpointHost,
       credentialConfigured: foundryCredentialsPresent(),
-      modelConfigured: Boolean(process.env.FOUNDRY_MODEL),
+      modelConfigured: Boolean(process.env.FOUNDRY_MODEL || process.env.AZURE_MODEL_DEPLOYMENT_NAME),
     };
   });
 

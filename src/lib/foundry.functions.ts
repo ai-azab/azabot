@@ -36,17 +36,16 @@ export type FoundryRealtimeSessionResult =
     };
 
 function getBase(): string {
-  const base = process.env.FOUNDRY_PROJECT_ENDPOINT;
+  const base = process.env.FOUNDRY_PROJECT_ENDPOINT || process.env.AZURE_FOUNDRY_PROJECT_ENDPOINT || process.env.AZURE_EXISTING_AIPROJECT_ENDPOINT;
   if (!base) throw new Error("FOUNDRY_PROJECT_ENDPOINT is not configured");
   return base.replace(/\/+$/, "");
 }
 
 function authHeaders(): Record<string, string> {
-  const key = process.env.FOUNDRY_API_KEY;
+  const key = process.env.FOUNDRY_API_KEY || process.env.AZURE_FOUNDRY_ACCOUNT_KEY;
   if (!key) throw new Error("FOUNDRY_API_KEY is not configured");
   return {
     "Content-Type": "application/json",
-    Authorization: `Bearer ${key}`,
     "api-key": key,
   };
 }
