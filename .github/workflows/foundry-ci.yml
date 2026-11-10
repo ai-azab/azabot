@@ -18,4 +18,5 @@ jobs:
       - run: bun run build
       - run: bun run typecheck
       - name: Lint Foundry integration code (legacy repository lint is tracked separately)
-        run: bunx eslint src/lib/foundry-admin.functions.ts src/lib/foundry-live.functions.ts src/lib/foundry-training.functions.ts src/lib/foundry-transport.server.ts src/routes/admin.foundry.tsx src/routes/admin.training.tsx --rule 'prettier/prettier: off'
+        run: |
+          bunx eslint src/lib/foundry-admin.functions.ts src/lib/foundry-live.functions.ts src/lib/foundry-training.functions.ts src/lib/foundry-transport.server.ts src/routes/admin.foundry.tsx src/routes/admin.training.tsx --rule 'prettier/prettier: off'
