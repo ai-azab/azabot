@@ -1,8 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { foundryBase, foundryCredentialsPresent, foundryRequest } from "@/lib/foundry-transport.server";
 
-async function assertAdmin(context: { supabase: { rpc: (name: string, args: Record<string, string>) => PromiseLike<{ data: unknown; error: unknown }> }; userId: string }) {
+async function assertAdmin(context: { supabase: SupabaseClient; userId: string }) {
   const { data, error } = await context.supabase.rpc("has_role", {
     _user_id: context.userId, _role: "admin",
   });
@@ -12,7 +13,7 @@ async function assertAdmin(context: { supabase: { rpc: (name: string, args: Reco
 export const getFoundrySettingsStatus = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    await assertAdmin(context);
+    await assertAdmin({ ...context, supabase: context.supabase as unknown as SupabaseClient });
     let endpointHost = "";
     try { endpointHost = new URL(foundryBase()).host; } catch { /* not configured */ }
     return {
@@ -31,7 +32,7 @@ export interface DiscoveredFoundryAgent {
 export const discoverFoundryAgents = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<DiscoveredFoundryAgent[]> => {
-    await assertAdmin(context);
+    await assertAdmin({ ...context, supabase: context.supabase as unknown as SupabaseClient });
     const agents: DiscoveredFoundryAgent[] = [];
     const seen = new Set<string>();
     let after: string | null = null;
@@ -67,7 +68,7 @@ export const testFoundryAgent = createServerFn({ method: "POST" })
     return { name: data.name };
   })
   .handler(async ({ data, context }) => {
-    await assertAdmin(context);
+    await assertAdmin({ ...context, supabase: context.supabase as unknown as SupabaseClient });
     const agent = await foundryRequest<{ name: string; state?: string; versions?: { latest?: { version?: string } } }>(
       "/agents/" + encodeURIComponent(data.name) + "?api-version=v1",
     );
