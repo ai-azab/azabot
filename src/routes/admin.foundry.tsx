@@ -56,30 +56,53 @@ function FoundrySettingsPage() {
     let added = 0;
     let updated = 0;
     let skipped = 0;
+    let failed = 0;
     try {
       const existing = await loadExisting();
-      const byName = new Map(existing.filter((a) => a.provider === "foundry").map((a) => [a.agent_name, a]));
+      const byName = new Map(
+        existing.filter((a) => a.provider === "foundry").map((a) => [a.agent_name, a]),
+      );
       for (const agent of remote.data) {
         if (!agent.version) { skipped++; continue; }
         const previous = byName.get(agent.name);
-        if (previous) {
-          if (previous.agent_version === agent.version) { skipped++; continue; }
-          await save({ data: { ...previous, agent_version: agent.version } });
-          updated++;
+        if (previous?.is_active && previous.agent_version === agent.version) {
+          skipped++;
           continue;
         }
-        await save({ data: {
-          name: agent.name, description: agent.description, provider: "foundry",
-          agent_name: agent.name, agent_version: agent.version, deployment: null,
-          system_prompt: "", temperature: 0.7, max_tokens: 800,
-          is_default: false, is_active: true, sort_order: 100 + added,
-        } });
-        added++;
+        // An agent must answer a real Foundry API request before it can be offered to visitors.
+        try {
+          const checked = await testAgent({ data: { name: agent.name } });
+          if (!checked.ok || (checked.version != null && String(checked.version) !== agent.version)) {
+            throw new Error("الوكيل أو الإصدار لم يجتز التحقق");
+          }
+        } catch (error) {
+          failed++;
+          setTests((state) => ({
+            ...state,
+            [agent.name]: `لم يتم تفعيل الوكيل: ${(error as Error).message}`,
+          }));
+          continue;
+        }
+        if (previous) {
+          await save({ data: {
+            ...previous, agent_version: agent.version, is_active: true,
+          } });
+          updated++;
+        } else {
+          await save({ data: {
+            name: agent.name, description: agent.description, provider: "foundry",
+            agent_name: agent.name, agent_version: agent.version, deployment: null,
+            system_prompt: "", temperature: 0.7, max_tokens: 800,
+            is_default: false, is_active: true, sort_order: 100 + added,
+          } });
+          added++;
+        }
+        setTests((state) => ({ ...state, [agent.name]: "تم التحقق من الاستجابة وتفعيل الوكيل" }));
       }
       await qc.invalidateQueries({ queryKey: ["admin", "agents"] });
-      setMessage(`تم إضافة ${added} وكيل وتحديث إصدار ${updated} وكيل، وتخطي ${skipped}.`);
+      setMessage(`تم إضافة ${added} وكيل، وتحديث أو تفعيل ${updated}، وتخطي ${skipped}، وفشل اختبار ${failed}. لا يتم تفعيل وكيل دون استجابة فعلية من Foundry.`);
     } catch (error) {
-      setMessage(`تمت إضافة ${added} وتحديث ${updated} قبل توقف المزامنة: ${(error as Error).message}`);
+      setMessage(`المزامنة توقفت بعد إضافة ${added} وتحديث ${updated}: ${(error as Error).message}`);
     } finally {
       setImporting(false);
     }

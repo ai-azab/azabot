@@ -71,7 +71,18 @@ export default {
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
-      return await normalizeCatastrophicSsrResponse(response);
+      const result = await normalizeCatastrophicSsrResponse(response);
+      if (new URL(request.url).pathname === "/embed") {
+        const headers = new Headers(result.headers);
+        headers.set("Content-Security-Policy", "frame-ancestors 'self' https://alazab.com https://*.alazab.com");
+        headers.set("X-Content-Type-Options", "nosniff");
+        return new Response(result.body, {
+          status: result.status,
+          statusText: result.statusText,
+          headers,
+        });
+      }
+      return result;
     } catch (error) {
       console.error(error);
       return brandedErrorResponse();
