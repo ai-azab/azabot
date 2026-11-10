@@ -140,7 +140,7 @@ export const publishAgentTraining = createServerFn({ method: "POST" })
     if (plan.baseVersion !== data.expectedVersion) throw new Error("Agent version changed; preview again");
     const current = await foundryRequest<{ versions?: { latest?: { version?: string } } }>(
       "/agents/" + encodeURIComponent(plan.agentName) + "?api-version=v1");
-    if (current.versions?.latest?.version !== plan.baseVersion)
+    if (String(current.versions?.latest?.version ?? "") !== plan.baseVersion)
       throw new Error("Newer Foundry version exists; sync it before publishing training");
     const published = await foundryRequest<{ version: string; status?: string }>(
       "/agents/" + encodeURIComponent(plan.agentName) + "/versions?api-version=v1",
